@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажер: Обложка дела</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-header {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        }
+        
+        .timer-fixed {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);
+        }
+        
+        .timer-warning {
+            animation: pulse 1s infinite;
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .gradient-header h1 {
+                font-size: 1.75rem !important;
+            }
+            
+            .gradient-header p {
+                font-size: 1rem !important;
+            }
+            
+            .timer-fixed {
+                bottom: 12px;
+                right: 12px;
+                padding: 12px 16px;
+                border-radius: 12px;
+            }
+            
+            .timer-fixed .text-3xl {
+                font-size: 1.5rem;
+            }
+            
+            .timer-fixed .text-2xl {
+                font-size: 1.25rem;
+            }
+            
+            .cover-box {
+                padding: 20px;
+                min-height: 400px;
+            }
+            
+            .cover-input {
+                font-size: 12px;
+            }
+            
+            body {
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .gradient-header {
+                padding: 1.5rem 0 !important;
+            }
+            
+            .gradient-header h1 {
+                font-size: 1.5rem !important;
+            }
+            
+            .timer-fixed {
+                bottom: 8px;
+                right: 8px;
+                padding: 8px 12px;
+            }
+            
+            .cover-box {
+                padding: 15px;
+                min-height: 350px;
+            }
+        }
+        
+        .correct { background-color: #d1fae5 !important; }
+        .incorrect { background-color: #fee2e2 !important; }
+        
+        .cover-box {
+            border: 3px solid #000;
+            padding: 40px;
+            min-height: 600px;
+            background: #fef3c7;
+        }
+        
+        .cover-input {
+            border: none;
+            border-bottom: 2px solid #666;
+            background: transparent;
+            padding: 4px 8px;
+            font-size: 14px;
+            width: 100%;
+        }
+        
+        .cover-input:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="gradient-header text-white py-6 md:py-8 mb-6 md:mb-8">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <a href="../index.html" class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-3 md:px-4 py-2 rounded-lg transition text-sm md:text-base">
+                    <span>←</span>
+                    <span>На главную</span>
+                </a>
+                <div class="text-xs md:text-sm opacity-90">АНО ДПО «УЦИБ»</div>
+            </div>
+            <h1 class="text-2xl md:text-4xl font-bold mb-2">📕 Обложка дела</h1>
+            <p class="text-base md:text-xl opacity-90">Тренажер по архивному делу</p>
+        </div>
+    </div>
+    
+    <!-- Фиксированный таймер -->
+    <div id="timer" class="timer-fixed">
+        <div class="flex items-center gap-3">
+            <span class="text-3xl">⏱️</span>
+            <div>
+                <div class="text-xs opacity-90 font-medium">Осталось времени</div>
+                <div id="timer-display" class="text-2xl font-bold">10:00</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 pb-8">
+        <!-- Инструкция -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="bg-violet-50 border-l-4 border-violet-500 p-4 rounded-r-lg">
+                <h3 class="font-bold text-violet-800 mb-3 text-lg">📝 Задание для студента</h3>
+                <p class="text-gray-700 mb-3">Оформите обложку дела согласно требованиям:</p>
+                <div class="space-y-2 text-gray-700 text-sm">
+                    <div><strong>Организация:</strong> АНО ДПО «УЦИБ»</div>
+                    <div><strong>Структурное подразделение:</strong> Отдел кадров</div>
+                    <div><strong>Индекс дела:</strong> 01-03</div>
+                    <div><strong>Заголовок:</strong> Личные дела уволенных работников</div>
+                    <div><strong>Крайние даты:</strong> 2023 год</div>
+                    <div><strong>Количество листов:</strong> 156</div>
+                    <div><strong>Срок хранения:</strong> 50 лет</div>
+                    <div><strong>Архивный шифр:</strong> Ф. 1, Оп. 2, Д. 45</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Обложка дела -->
+        <div class="bg-white rounded-xl shadow-2xl p-8 mb-8">
+            <div class="cover-box">
+                <!-- Верхняя часть -->
+                <div class="text-center mb-8">
+                    <div class="mb-4">
+                        <input type="text" id="organization" class="cover-input text-center font-bold" placeholder="Наименование организации">
+                    </div>
+                    <div class="text-sm text-gray-600 mb-4">(наименование организации)</div>
+                    
+                    <div class="mb-4">
+                        <input type="text" id="department" class="cover-input text-center" placeholder="Структурное подразделение">
+                    </div>
+                    <div class="text-sm text-gray-600">(структурное подразделение)</div>
+                </div>
+
+                <!-- Архивный шифр -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-bold">Ф.</span>
+                        <input type="text" id="fond" class="cover-input w-20 text-center" placeholder="№">
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-bold">Оп.</span>
+                        <input type="text" id="opis" class="cover-input w-20 text-center" placeholder="№">
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold">Д.</span>
+                        <input type="text" id="delo" class="cover-input w-20 text-center" placeholder="№">
+                    </div>
+                </div>
+
+                <!-- ДЕЛО -->
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold mb-6">ДЕЛО</h2>
+                    
+                    <div class="mb-4">
+                        <input type="text" id="index" class="cover-input text-center w-32 mx-auto" placeholder="Индекс">
+                    </div>
+                    <div class="text-sm text-gray-600 mb-6">(индекс дела)</div>
+                    
+                    <div class="mb-4">
+                        <textarea id="title" class="cover-input text-center" rows="3" placeholder="Заголовок дела"></textarea>
+                    </div>
+                    <div class="text-sm text-gray-600">(заголовок дела)</div>
+                </div>
+
+                <!-- Крайние даты -->
+                <div class="text-center mb-8">
+                    <div class="mb-2">
+                        <input type="text" id="dates" class="cover-input text-center w-40 mx-auto" placeholder="Даты">
+                    </div>
+                    <div class="text-sm text-gray-600">(крайние даты)</div>
+                </div>
+
+                <!-- Нижняя часть -->
+                <div class="mt-12">
+                    <div class="flex justify-between items-center mb-4">
+                        <span>На</span>
+                        <input type="text" id="sheets" class="cover-input w-24 text-center" placeholder="листах">
+                        <span>листах</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <span>Хранить</span>
+                        <input type="text" id="storage" class="cover-input w-32 text-center" placeholder="срок">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки -->
+        <div class="text-center mb-8">
+            <button id="check-button" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition shadow-lg">
+                ✓ Проверить заполнение
+            </button>
+            <button onclick="resetForm()" class="ml-4 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg text-lg transition shadow-lg">
+                🔄 Сбросить
+            </button>
+        </div>
+
+        <!-- Результаты -->
+        <div id="results" class="hidden bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Результаты проверки</h3>
+            <div id="result-message" class="text-center text-lg mb-4"></div>
+            <div id="score" class="text-center mb-4"></div>
+        </div>
+
+        <!-- Прогресс -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h4 class="font-bold text-gray-800 mb-4 text-lg">📊 Статистика заполнения:</h4>
+            <div class="flex items-center gap-4">
+                <div class="flex-1 bg-gray-200 rounded-full h-6">
+                    <div id="progress-bar" class="bg-violet-600 h-6 rounded-full transition-all duration-500 flex items-center justify-center text-white text-sm font-semibold" style="width: 0%"></div>
+                </div>
+                <span id="progress-text" class="font-bold text-lg text-gray-700">0/10</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Определение режима
+        const urlParams = new URLSearchParams(window.location.search);
+        const isExamMode = urlParams.get('mode') === 'exam';
+        
+        // Настройки режима
+        const MODE_CONFIG = {
+            training: {
+                time: 600, // 10 минут
+                showHints: true,
+                allowMultipleAttempts: true,
+                title: '📕 Обложка дела'
+            },
+            exam: {
+                time: 420, // 7 минут
+                showHints: false,
+                allowMultipleAttempts: false,
+                title: '🎓 Экзамен: Обложка дела'
+            }
+        };
+        
+        const currentMode = isExamMode ? MODE_CONFIG.exam : MODE_CONFIG.training;
+        let attemptsMade = 0;
+        
+        // Обновляем заголовок
+        document.querySelector('.gradient-header h1').textContent = currentMode.title;
+        
+        // Добавляем индикатор режима
+        if (isExamMode) {
+            const header = document.querySelector('.gradient-header .max-w-6xl');
+            const examBadge = document.createElement('div');
+            examBadge.className = 'mt-4 inline-block bg-red-500 text-white px-6 py-2 rounded-full font-semibold';
+            examBadge.innerHTML = '⚠️ РЕЖИМ ЭКЗАМЕНА: Одна попытка, без подсказок';
+            header.appendChild(examBadge);
+        }
+        
+        // Эталонные ответы
+        const correctAnswers = {
+            organization: 'Автономная некоммерческая организация дополнительного профессионального образования «Учебный центр информационной безопасности» (АНО ДПО «УЦИБ»)',
+            department: 'Отдел кадров',
+            fond: '1',
+            opis: '2',
+            delo: '45',
+            index: '01-03',
+            title: 'Личные дела уволенных работников',
+            dates: '2023',
+            sheets: '156',
+            storage: '50 лет'
+        };
+
+        const totalFields = Object.keys(correctAnswers).length;
+
+        // Система сохранения прогресса
+        const STORAGE_KEY = 'archiveTraining_progress';
+        
+        function getProgress() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : {};
+        }
+        
+        function saveProgress(trainerId, data) {
+            const progress = getProgress();
+            if (!progress[trainerId]) {
+                progress[trainerId] = {
+                    attempts: 0,
+                    bestScore: 0,
+                    bestTime: null,
+                    completed: false,
+                    lastAttempt: null
+                };
+            }
+            
+            progress[trainerId] = { ...progress[trainerId], ...data };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Таймер
+        let timeLeft = currentMode.time;
+        let timerInterval;
+        let timerStarted = false;
+        let startTime = currentMode.time;
+
+        function startTimer() {
+            if (timerStarted) return;
+            timerStarted = true;
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeUp();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            const timerElement = document.getElementById('timer-display');
+            timerElement.textContent = display;
+            
+            if (timeLeft <= 120 && timeLeft > 0) {
+                document.getElementById('timer').classList.add('timer-warning');
+            }
+            
+            if (timeLeft <= 0) {
+                timerElement.textContent = '0:00';
+            }
+        }
+
+        function handleTimeUp() {
+            alert('⏰ Время вышло! Проверяем ваши ответы...');
+            checkAnswers();
+        }
+
+        // Проверка ответов
+        function checkAnswers() {
+            let correctCount = 0;
+            
+            Object.keys(correctAnswers).forEach(fieldId => {
+                const input = document.getElementById(fieldId);
+                const userAnswer = input.value.trim();
+                const correctAnswer = correctAnswers[fieldId];
+                
+                input.classList.remove('correct', 'incorrect');
+                
+                if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+                    input.classList.add('correct');
+                    correctCount++;
+                } else if (userAnswer) {
+                    input.classList.add('incorrect');
+                }
+            });
+            
+            updateProgress(correctCount);
+            showResults(correctCount);
+        }
+
+        function updateProgress(correctCount) {
+            const percentage = (correctCount / totalFields) * 100;
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            progressBar.style.width = `${percentage}%`;
+            progressBar.textContent = `${Math.round(percentage)}%`;
+            progressText.textContent = `${correctCount}/${totalFields}`;
+        }
+
+        function showResults(correctCount) {
+            const resultsDiv = document.getElementById('results');
+            const resultMessage = document.getElementById('result-message');
+            const scoreDiv = document.getElementById('score');
+            
+            resultsDiv.classList.remove('hidden');
+            
+            const timeSpent = startTime - timeLeft;
+            const progress = getProgress()['oblozhka-dela'] || {};
+            const attempts = (progress.attempts || 0) + 1;
+            const isNewBest = correctCount > (progress.bestScore || 0);
+            const isFasterTime = !progress.bestTime || timeSpent < progress.bestTime;
+            
+            saveProgress('oblozhka-dela', {
+                attempts: attempts,
+                bestScore: isNewBest ? correctCount : progress.bestScore,
+                bestTime: (isNewBest || isFasterTime) ? timeSpent : progress.bestTime,
+                completed: correctCount === totalFields,
+                lastAttempt: new Date().toISOString(),
+                lastScore: correctCount
+            });
+            
+            if (correctCount === totalFields) {
+                resultMessage.innerHTML = `
+                    <span class="text-green-600 font-bold">🎉 Отлично! Обложка оформлена верно!</span>
+                    ${isNewBest ? '<div class="text-sm text-green-600 mt-2">🏆 Новый рекорд!</div>' : ''}
+                `;
+            } else {
+                resultMessage.innerHTML = '<span class="text-red-600 font-bold">⚠️ Есть ошибки в заполнении</span>';
+            }
+            
+            scoreDiv.innerHTML = `
+                <div>Правильно заполнено: ${correctCount} из ${totalFields} полей</div>
+                <div class="text-sm text-gray-600 mt-2">Время: ${formatTime(timeSpent)} | Попытка: ${attempts}</div>
+                ${progress.bestScore ? `<div class="text-sm text-violet-600 mt-1">Лучший результат: ${progress.bestScore}/${totalFields} за ${formatTime(progress.bestTime)}</div>` : ''}
+            `;
+            
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            Object.keys(correctAnswers).forEach(fieldId => {
+                const input = document.getElementById(fieldId);
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            });
+            
+            document.getElementById('results').classList.add('hidden');
+            updateProgress(0);
+        }
+
+        // Запуск таймера при первом вводе
+        document.addEventListener('DOMContentLoaded', () => {
+            Object.keys(correctAnswers).forEach(fieldId => {
+                const input = document.getElementById(fieldId);
+                input.addEventListener('focus', startTimer, { once: true });
+            });
+        });
+
+        // Кнопка проверки
+        document.getElementById('check-button').addEventListener('click', checkAnswers);
+
+        // Инициализация
+        updateProgress(0);
+    </script>
+</body>
+</html>

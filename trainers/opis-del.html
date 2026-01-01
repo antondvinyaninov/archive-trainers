@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажер: Опись дел по личному составу</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-header {
+            background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+        }
+        
+        .correct { background-color: #d1fae5 !important; }
+        .incorrect { background-color: #fee2e2 !important; }
+        .feedback { font-size: 0.8rem; margin-top: 2px; }
+        .feedback.correct { color: #059669; }
+        .feedback.incorrect { color: #dc2626; }
+        .document-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 14px;
+        }
+        .document-table td, .document-table th {
+            border: 1px solid #000;
+            padding: 4px 8px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .document-table input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 14px;
+        }
+        .document-table input:focus {
+            outline: none;
+            background-color: #f0f9ff;
+        }
+        .signature-line {
+            border-bottom: 1px solid #000;
+            min-width: 150px;
+            display: inline-block;
+            margin: 0 10px;
+        }
+        
+        .timer-fixed {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(147, 51, 234, 0.4);
+        }
+        
+        .timer-warning {
+            animation: pulse 1s infinite;
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .gradient-header h1 {
+                font-size: 1.75rem !important;
+            }
+            
+            .gradient-header p {
+                font-size: 1rem !important;
+            }
+            
+            .timer-fixed {
+                bottom: 12px;
+                right: 12px;
+                padding: 12px 16px;
+                border-radius: 12px;
+            }
+            
+            .timer-fixed .text-3xl {
+                font-size: 1.5rem;
+            }
+            
+            .timer-fixed .text-2xl {
+                font-size: 1.25rem;
+            }
+            
+            .document-table {
+                font-size: 11px;
+            }
+            
+            .document-table input {
+                font-size: 11px;
+                padding: 2px;
+            }
+            
+            body {
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .gradient-header {
+                padding: 1.5rem 0 !important;
+            }
+            
+            .gradient-header h1 {
+                font-size: 1.5rem !important;
+            }
+            
+            .timer-fixed {
+                bottom: 8px;
+                right: 8px;
+                padding: 8px 12px;
+            }
+            
+            .document-table {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="gradient-header text-white py-6 md:py-8 mb-6 md:mb-8">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <a href="../index.html" class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-3 md:px-4 py-2 rounded-lg transition text-sm md:text-base">
+                    <span>←</span>
+                    <span>На главную</span>
+                </a>
+                <div class="text-xs md:text-sm opacity-90">АНО ДПО «УЦИБ»</div>
+            </div>
+            <h1 class="text-2xl md:text-4xl font-bold mb-2">📋 Опись дел по личному составу</h1>
+            <p class="text-base md:text-xl opacity-90">Тренажер по архивному делу</p>
+        </div>
+    </div>
+    
+    <!-- Фиксированный таймер -->
+    <div id="timer" class="timer-fixed">
+        <div class="flex items-center gap-3">
+            <span class="text-3xl">⏱️</span>
+            <div>
+                <div class="text-xs opacity-90 font-medium">Осталось времени</div>
+                <div id="timer-display" class="text-2xl font-bold">10:00</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 pb-8">
+        <!-- Инструкция -->
+        <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6 md:mb-8">
+            <div class="bg-purple-50 border-l-4 border-purple-500 p-3 md:p-4 rounded-r-lg">
+                <h3 class="font-bold text-purple-800 mb-2 md:mb-3 text-base md:text-lg">📝 Задание для студента</h3>
+                <p class="text-gray-700 mb-2 md:mb-3 text-sm md:text-base">Заполните "Опись дел по личному составу" согласно предложенной преподавателем ситуации:</p>
+                <div class="space-y-1 md:space-y-2 text-gray-700 text-xs md:text-sm">
+                    <div><strong>Организация:</strong> укажите наименование организации, как в Карточке организации</div>
+                    <div><strong>Фонд №:</strong> укажите номер 1</div>
+                    <div><strong>Опись №:</strong> номер описи дел по личному составу за 2023 год (номер 2)</div>
+                    <div><strong>№ п/п:</strong> укажите порядковый номер дела, если опись дел по личному составу за 2022 год закончилась на 55 деле (Нумерация дел валовая!)</div>
+                    <div><strong>Индекс дела:</strong> укажите с обложки дела</div>
+                    <div><strong>Заголовок дела:</strong> укажите с обложки дела</div>
+                    <div><strong>Крайние даты:</strong> графа не заполняется, если в заголовке дела указано на какой или за какой год дело составлено</div>
+                    <div><strong>Срок хранения:</strong> укажите с обложки дела</div>
+                    <div><strong>Количество листов:</strong> укажите с обложки дела</div>
+                    <div><strong>Примечания:</strong> не заполняется</div>
+                    <div><strong>с № по №:</strong> укажите номер дела, включенного в данную опись</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Документ для заполнения -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="mb-8">
+                <!-- Организация и УТВЕРЖДАЮ -->
+                <div class="flex justify-between mb-6">
+                    <div class="w-2/3">
+                        <div class="mb-2">
+                            <input type="text" id="organization" class="w-full border-b border-gray-400 p-1 text-lg" 
+                                   placeholder="Введите наименование организации">
+                            <div id="organization-feedback" class="feedback"></div>
+                        </div>
+                    </div>
+                    <div class="w-1/3 text-right">
+                        <div class="mb-2 font-bold">УТВЕРЖДАЮ</div>
+                        <div>Директор АНО ДПО «УЦИБ»</div>
+                        <div class="mt-1">Елисеев                В.А. Елисеев</div>
+                        <div class="mt-1">Дата</div>
+                    </div>
+                </div>
+
+                <!-- Основные поля документа -->
+                <div class="mb-6">
+                    <div class="flex items-center mb-2">
+                        <span class="w-48">(наименование организации)</span>
+                        <div class="flex-1"></div>
+                    </div>
+                    
+                    <div class="flex items-center mb-2">
+                        <span class="w-48">Фонд №</span>
+                        <input type="text" id="fund-number" class="w-24 border-b border-gray-400 p-1 text-center" 
+                               placeholder="№">
+                        <div id="fund-number-feedback" class="feedback ml-2"></div>
+                    </div>
+                    
+                    <div class="flex items-center mb-2">
+                        <span class="w-48">ОПИСЬ №</span>
+                        <input type="text" id="inventory-number" class="w-24 border-b border-gray-400 p-1 text-center" 
+                               placeholder="№">
+                        <div id="inventory-number-feedback" class="feedback ml-2"></div>
+                    </div>
+                    
+                    <div class="font-bold mb-2">дел, документов по личному составу за 2023 год</div>
+                </div>
+
+                <!-- Основная таблица -->
+                <table class="document-table mb-6">
+                    <thead>
+                        <tr>
+                            <th>№ п/п</th>
+                            <th>Индекс дела</th>
+                            <th>Заголовок дела</th>
+                            <th>Крайние даты</th>
+                            <th>Срок хранения</th>
+                            <th>Количество листов</th>
+                            <th>Примечания</th>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                            <td>4</td>
+                            <td>5</td>
+                            <td>6</td>
+                            <td>7</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="7" class="text-center font-bold">2023 год</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="text" id="case-number" class="text-center" placeholder="№">
+                                <div id="case-number-feedback" class="feedback"></div>
+                            </td>
+                            <td>
+                                <input type="text" id="case-index" class="text-center" placeholder="Индекс">
+                                <div id="case-index-feedback" class="feedback"></div>
+                            </td>
+                            <td>
+                                <input type="text" id="case-title" class="text-center" placeholder="Заголовок">
+                                <div id="case-title-feedback" class="feedback"></div>
+                            </td>
+                            <td>
+                                <input type="text" id="dates" class="text-center" placeholder="Даты">
+                                <div id="dates-feedback" class="feedback"></div>
+                            </td>
+                            <td>
+                                <input type="text" id="storage-period" class="text-center" placeholder="Срок">
+                                <div id="storage-period-feedback" class="feedback"></div>
+                            </td>
+                            <td>
+                                <input type="text" id="sheets-count" class="text-center" placeholder="Кол-во">
+                                <div id="sheets-count-feedback" class="feedback"></div>
+                            </td>
+                            <td>
+                                <input type="text" id="notes" class="text-center" placeholder="Примечания">
+                                <div id="notes-feedback" class="feedback"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="7" style="height: 50px;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Нижняя часть документа -->
+                <div class="mb-6">
+                    <div class="flex items-center mb-2">
+                        <span>В данный раздел описи внесено</span>
+                        <input type="text" id="cases-count" class="w-16 border-b border-gray-400 p-1 text-center mx-2" 
+                               value="1" readonly>
+                        <span>(одно)</span>
+                    </div>
+                    <div class="text-center text-sm mb-4">(цифрами и прописью)</div>
+                    <div class="text-center mb-4">дел</div>
+                    
+                    <div class="flex items-center justify-center mb-4">
+                        <span>с №</span>
+                        <input type="text" id="from-number" class="w-16 border-b border-gray-400 p-1 text-center mx-2" 
+                               placeholder="№">
+                        <span>по №</span>
+                        <input type="text" id="to-number" class="w-16 border-b border-gray-400 p-1 text-center mx-2" 
+                               placeholder="№">
+                        <span>, в том числе</span>
+                    </div>
+                    
+                    <div class="flex items-center mb-2">
+                        <span class="w-48">литерные номера:</span>
+                        <span class="border-b border-gray-400 w-24 text-center">-</span>
+                    </div>
+                    
+                    <div class="flex items-center mb-6">
+                        <span class="w-48">пропущенные номера:</span>
+                        <span class="border-b border-gray-400 w-24 text-center">-</span>
+                    </div>
+
+                    <!-- Подписи -->
+                    <div class="flex justify-between mb-8">
+                        <div class="text-center">
+                            <div>Архивист</div>
+                            <div class="mt-1">Скопа</div>
+                            <div class="mt-1">Н.М. Скопа</div>
+                            <div class="mt-2">(подпись)</div>
+                            <div>(расшифровка подписи)</div>
+                            <div class="mt-4">(дата)</div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div>Архивист</div>
+                            <div class="mt-1">Скопа</div>
+                            <div class="mt-1">Н.М. Скопа</div>
+                            <div class="mt-2">(подпись)</div>
+                            <div>(расшифровка подписи)</div>
+                            <div class="mt-4">(дата)</div>
+                        </div>
+                    </div>
+
+                    <!-- Согласование и утверждение -->
+                    <div class="flex justify-between">
+                        <div class="text-center">
+                            <div class="font-bold mb-2">СОГЛАСОВАНО</div>
+                            <div>Протокол ЦЭК организации</div>
+                            <div class="mt-2">от</div>
+                            <div class="inline-block signature-line"></div>
+                            <div>№</div>
+                            <div class="inline-block signature-line"></div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="font-bold mb-2">УТВЕРЖДЕНА</div>
+                            <div>Протокол ЭПМК Комитета по делам архивов при правительстве УР</div>
+                            <div class="mt-2">от</div>
+                            <div class="inline-block signature-line"></div>
+                            <div>№</div>
+                            <div class="inline-block signature-line"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопка проверки и результаты -->
+        <div class="text-center mb-6 md:mb-8">
+            <button id="check-button" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 md:py-3 px-6 md:px-8 rounded-lg text-base md:text-lg transition duration-300 shadow-lg">
+                ✓ Проверить заполнение документа
+            </button>
+        </div>
+
+        <!-- Результаты проверки -->
+        <div id="results" class="hidden bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Результаты проверки</h3>
+            <div id="result-message" class="text-center text-lg mb-4"></div>
+            <div id="score" class="text-center text-gray-600 mb-4"></div>
+            <div id="detailed-results" class="space-y-2"></div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h4 class="font-bold text-gray-800 mb-4 text-lg">📊 Статистика заполнения:</h4>
+            <div class="flex items-center gap-4">
+                <div class="flex-1 bg-gray-200 rounded-full h-6">
+                    <div id="progress-bar" class="bg-purple-600 h-6 rounded-full transition-all duration-500 flex items-center justify-center text-white text-sm font-semibold" style="width: 0%"></div>
+                </div>
+                <span id="progress-text" class="font-bold text-lg text-gray-700">0/11</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Определение режима
+        const urlParams = new URLSearchParams(window.location.search);
+        const isExamMode = urlParams.get('mode') === 'exam';
+        
+        // Настройки режима
+        const MODE_CONFIG = {
+            training: {
+                time: 600, // 10 минут
+                showHints: true,
+                allowMultipleAttempts: true,
+                title: '📋 Опись дел по личному составу'
+            },
+            exam: {
+                time: 420, // 7 минут
+                showHints: false,
+                allowMultipleAttempts: false,
+                title: '🎓 Экзамен: Опись дел по личному составу'
+            }
+        };
+        
+        const currentMode = isExamMode ? MODE_CONFIG.exam : MODE_CONFIG.training;
+        
+        // Обновляем заголовок
+        document.querySelector('.gradient-header h1').textContent = currentMode.title;
+        
+        // Добавляем индикатор режима
+        if (isExamMode) {
+            const header = document.querySelector('.gradient-header .max-w-6xl');
+            const examBadge = document.createElement('div');
+            examBadge.className = 'mt-4 inline-block bg-red-500 text-white px-6 py-2 rounded-full font-semibold';
+            examBadge.innerHTML = '⚠️ РЕЖИМ ЭКЗАМЕНА: Одна попытка, без подсказок';
+            header.appendChild(examBadge);
+        }
+        
+        // Эталонные ответы
+        const correctAnswers = {
+            organization: "Автономная некоммерческая организация дополнительного профессионального образования «Учебный центр информационной безопасности» (АНО ДПО «УЦИБ»)",
+            fundNumber: "1",
+            inventoryNumber: "2",
+            caseNumber: "56",
+            caseIndex: "01-20",
+            caseTitle: "Личные карточки уволенных работников за 2023 год (ф. № Т-2)",
+            dates: "",
+            storagePeriod: "50 лет",
+            sheetsCount: "12",
+            notes: "",
+            fromNumber: "56",
+            toNumber: "56"
+        };
+
+        // Элементы ввода
+        const inputs = {
+            organization: document.getElementById('organization'),
+            fundNumber: document.getElementById('fund-number'),
+            inventoryNumber: document.getElementById('inventory-number'),
+            caseNumber: document.getElementById('case-number'),
+            caseIndex: document.getElementById('case-index'),
+            caseTitle: document.getElementById('case-title'),
+            dates: document.getElementById('dates'),
+            storagePeriod: document.getElementById('storage-period'),
+            sheetsCount: document.getElementById('sheets-count'),
+            notes: document.getElementById('notes'),
+            fromNumber: document.getElementById('from-number'),
+            toNumber: document.getElementById('to-number')
+        };
+
+        // Элементы для обратной связи
+        const feedbackElements = {
+            organization: document.getElementById('organization-feedback'),
+            fundNumber: document.getElementById('fund-number-feedback'),
+            inventoryNumber: document.getElementById('inventory-number-feedback'),
+            caseNumber: document.getElementById('case-number-feedback'),
+            caseIndex: document.getElementById('case-index-feedback'),
+            caseTitle: document.getElementById('case-title-feedback'),
+            dates: document.getElementById('dates-feedback'),
+            storagePeriod: document.getElementById('storage-period-feedback'),
+            sheetsCount: document.getElementById('sheets-count-feedback'),
+            notes: document.getElementById('notes-feedback')
+        };
+
+        // Функция для нормализации строк (удаление лишних пробелов, приведение к нижнему регистру)
+        function normalizeString(str) {
+            return str.trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+
+        // Функция для проверки ответа
+        function checkAnswer(inputId, userAnswer) {
+            const correctAnswer = correctAnswers[inputId];
+            const normalizedUser = normalizeString(userAnswer);
+            const normalizedCorrect = normalizeString(correctAnswer);
+            
+            return normalizedUser === normalizedCorrect;
+        }
+
+        // Функция для обновления стиля и обратной связи
+        function updateFieldFeedback(inputId, isCorrect) {
+            const input = inputs[inputId];
+            const feedback = feedbackElements[inputId];
+            
+            if (input && feedback) {
+                if (isCorrect) {
+                    input.classList.add('correct');
+                    input.classList.remove('incorrect');
+                    feedback.textContent = '✓ Верно';
+                    feedback.className = 'feedback correct';
+                } else {
+                    input.classList.add('incorrect');
+                    input.classList.remove('correct');
+                    feedback.textContent = '✗ Неверно';
+                    feedback.className = 'feedback incorrect';
+                }
+            }
+        }
+
+        // Функция для проверки всех полей
+        function checkAllFields() {
+            let correctCount = 0;
+            const totalFields = Object.keys(correctAnswers).length;
+            
+            // Проверяем каждое поле
+            for (const [fieldId, correctAnswer] of Object.entries(correctAnswers)) {
+                const userAnswer = inputs[fieldId] ? inputs[fieldId].value : '';
+                const isCorrect = checkAnswer(fieldId, userAnswer);
+                
+                if (isCorrect) {
+                    correctCount++;
+                }
+                
+                // Обновляем обратную связь для полей, у которых есть элементы обратной связи
+                if (feedbackElements[fieldId]) {
+                    updateFieldFeedback(fieldId, isCorrect);
+                }
+            }
+            
+            // Обновляем прогресс
+            updateProgress(correctCount, totalFields);
+            
+            return { correctCount, totalFields };
+        }
+
+        // Функция для обновления прогресса
+        function updateProgress(correctCount, totalFields) {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const percentage = (correctCount / totalFields) * 100;
+            
+            progressBar.style.width = `${percentage}%`;
+            progressBar.textContent = `${Math.round(percentage)}%`;
+            progressText.textContent = `${correctCount}/${totalFields}`;
+        }
+
+        // Функция для отображения результатов
+        function showResults(correctCount, totalFields) {
+            const resultsDiv = document.getElementById('results');
+            const resultMessage = document.getElementById('result-message');
+            const scoreDiv = document.getElementById('score');
+            const detailedResults = document.getElementById('detailed-results');
+            
+            resultsDiv.classList.remove('hidden');
+            
+            // Сохранение прогресса
+            const timeSpent = startTime - timeLeft;
+            const progress = getProgress()['opis-del'] || {};
+            const attempts = (progress.attempts || 0) + 1;
+            const isNewBest = correctCount > (progress.bestScore || 0);
+            const isFasterTime = !progress.bestTime || timeSpent < progress.bestTime;
+            
+            // Расчет оценки для режима экзамена
+            const percentage = (correctCount / totalFields) * 100;
+            let grade = '';
+            let gradeColor = '';
+            
+            if (isExamMode) {
+                if (percentage >= 90) {
+                    grade = '5 (Отлично)';
+                    gradeColor = 'text-green-600';
+                } else if (percentage >= 75) {
+                    grade = '4 (Хорошо)';
+                    gradeColor = 'text-blue-600';
+                } else if (percentage >= 60) {
+                    grade = '3 (Удовлетворительно)';
+                    gradeColor = 'text-yellow-600';
+                } else {
+                    grade = '2 (Неудовлетворительно)';
+                    gradeColor = 'text-red-600';
+                }
+            }
+            
+            saveProgress('opis-del', {
+                attempts: attempts,
+                bestScore: isNewBest ? correctCount : progress.bestScore,
+                bestTime: (isNewBest || isFasterTime) ? timeSpent : progress.bestTime,
+                completed: correctCount === totalFields,
+                lastAttempt: new Date().toISOString(),
+                lastScore: correctCount,
+                examGrade: isExamMode ? grade : null
+            });
+            
+            if (correctCount === totalFields) {
+                resultMessage.innerHTML = `
+                    <span class="text-green-600 font-bold">🎉 Поздравляю, документ оформлен верно!</span>
+                    ${isExamMode ? `<div class="text-3xl font-bold ${gradeColor} mt-4">Оценка: ${grade}</div>` : ''}
+                    ${isNewBest && !isExamMode ? '<div class="text-sm text-green-600 mt-2">🏆 Новый рекорд!</div>' : ''}
+                `;
+            } else {
+                resultMessage.innerHTML = `
+                    <span class="text-red-600 font-bold">⚠️ Есть ошибки в заполнении документа</span>
+                    ${isExamMode ? `<div class="text-3xl font-bold ${gradeColor} mt-4">Оценка: ${grade}</div>` : ''}
+                `;
+            }
+            
+            scoreDiv.innerHTML = `
+                <div>Правильно заполнено: ${correctCount} из ${totalFields} полей (${Math.round(percentage)}%)</div>
+                <div class="text-sm text-gray-600 mt-2">Время: ${formatTime(timeSpent)} | Попытка: ${attempts}</div>
+                ${progress.bestScore && !isExamMode ? `<div class="text-sm text-purple-600 mt-1">Лучший результат: ${progress.bestScore}/${totalFields} за ${formatTime(progress.bestTime)}</div>` : ''}
+                ${isExamMode ? '<div class="text-sm text-red-600 mt-2">⚠️ В режиме экзамена доступна только одна попытка</div>' : ''}
+            `;
+            
+            // Детализированные результаты (только в режиме обучения или показываем без правильных ответов в экзамене)
+            detailedResults.innerHTML = '';
+            for (const [fieldId, correctAnswer] of Object.entries(correctAnswers)) {
+                const userAnswer = inputs[fieldId] ? inputs[fieldId].value : '';
+                const isCorrect = checkAnswer(fieldId, userAnswer);
+                
+                const div = document.createElement('div');
+                div.className = `p-2 rounded ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`;
+                
+                const fieldName = getFieldName(fieldId);
+                div.innerHTML = `
+                    <div class="font-bold">${fieldName}:</div>
+                    <div>Ваш ответ: <span class="${isCorrect ? 'text-green-600' : 'text-red-600'}">"${userAnswer || '(не заполнено)'}"</span></div>
+                    ${!isCorrect && !isExamMode ? `<div class="text-sm text-gray-600 mt-1">Правильный ответ: "${correctAnswer}"</div>` : ''}
+                    ${!isCorrect && isExamMode ? `<div class="text-sm text-gray-600 mt-1">Правильные ответы не показываются в режиме экзамена</div>` : ''}
+                `;
+                
+                detailedResults.appendChild(div);
+            }
+            
+            // Блокируем повторную проверку в режиме экзамена
+            if (isExamMode) {
+                attemptsMade++;
+                document.getElementById('check-button').disabled = true;
+                document.getElementById('check-button').classList.add('opacity-50', 'cursor-not-allowed');
+                document.getElementById('check-button').textContent = '✓ Экзамен завершен';
+            }
+        }
+
+        // Функция для получения читаемого имени поля
+        function getFieldName(fieldId) {
+            const names = {
+                organization: 'Организация',
+                fundNumber: 'Фонд №',
+                inventoryNumber: 'Опись №',
+                caseNumber: '№ п/п',
+                caseIndex: 'Индекс дела',
+                caseTitle: 'Заголовок дела',
+                dates: 'Крайние даты',
+                storagePeriod: 'Срок хранения',
+                sheetsCount: 'Количество листов',
+                notes: 'Примечания',
+                fromNumber: 'с №',
+                toNumber: 'по №'
+            };
+            return names[fieldId] || fieldId;
+        }
+
+        // Обработчики событий для проверки при вводе
+        Object.keys(inputs).forEach(fieldId => {
+            const input = inputs[fieldId];
+            if (input) {
+                input.addEventListener('input', function() {
+                    const userAnswer = this.value;
+                    const isCorrect = checkAnswer(fieldId, userAnswer);
+                    
+                    if (feedbackElements[fieldId]) {
+                        updateFieldFeedback(fieldId, isCorrect);
+                    }
+                    
+                    // Обновляем общий прогресс
+                    const { correctCount, totalFields } = checkAllFields();
+                    updateProgress(correctCount, totalFields);
+                });
+            }
+        });
+
+        // Обработчик для кнопки проверки
+        document.getElementById('check-button').addEventListener('click', function() {
+            const { correctCount, totalFields } = checkAllFields();
+            showResults(correctCount, totalFields);
+            
+            // Прокрутка к результатам
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Система сохранения прогресса
+        const STORAGE_KEY = 'archiveTraining_progress';
+        
+        function getProgress() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : {};
+        }
+        
+        function saveProgress(trainerId, data) {
+            const progress = getProgress();
+            if (!progress[trainerId]) {
+                progress[trainerId] = {
+                    attempts: 0,
+                    bestScore: 0,
+                    bestTime: null,
+                    completed: false,
+                    lastAttempt: null
+                };
+            }
+            
+            progress[trainerId] = { ...progress[trainerId], ...data };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Таймер
+        let timeLeft = currentMode.time;
+        let timerInterval;
+        let timerStarted = false;
+        let startTime = currentMode.time;
+        let attemptsMade = 0;
+
+        function startTimer() {
+            if (timerStarted) return;
+            timerStarted = true;
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeUp();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            const timerElement = document.getElementById('timer-display');
+            timerElement.textContent = display;
+            
+            // Предупреждение когда осталось меньше 2 минут
+            if (timeLeft <= 120 && timeLeft > 0) {
+                document.getElementById('timer').classList.add('timer-warning');
+            }
+            
+            // Когда время вышло
+            if (timeLeft <= 0) {
+                timerElement.textContent = '0:00';
+            }
+        }
+
+        function handleTimeUp() {
+            alert('⏰ Время вышло! Проверяем ваши ответы...');
+            checkAllFields();
+            const { correctCount, totalFields } = checkAllFields();
+            showResults(correctCount, totalFields);
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Запуск таймера при первом вводе
+        Object.keys(inputs).forEach(fieldId => {
+            const input = inputs[fieldId];
+            if (input) {
+                input.addEventListener('focus', startTimer, { once: true });
+            }
+        });
+
+        // Инициализация прогресса
+        updateProgress(0, Object.keys(correctAnswers).length);
+    </script>
+</body>
+</html>

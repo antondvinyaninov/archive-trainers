@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажер: Протокол заседания экспертной комиссии</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-header {
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+        }
+        
+        .protocol-document {
+            font-family: 'Times New Roman', serif;
+            line-height: 1.5;
+        }
+        
+        .input-field {
+            border-bottom: 2px solid #3b82f6;
+            background: #eff6ff;
+            padding: 2px 8px;
+            margin: 0 4px;
+            min-width: 120px;
+            display: inline-block;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .correct {
+            border-color: #10b981;
+            background: #d1fae5;
+        }
+        
+        .incorrect {
+            border-color: #ef4444;
+            background: #fee2e2;
+        }
+        
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+        
+        .timer-fixed {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(234, 88, 12, 0.4);
+        }
+        
+        .timer-warning {
+            animation: pulse 1s infinite;
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .gradient-header h1 {
+                font-size: 1.75rem !important;
+            }
+            
+            .gradient-header p {
+                font-size: 1rem !important;
+            }
+            
+            .timer-fixed {
+                bottom: 12px;
+                right: 12px;
+                padding: 12px 16px;
+                border-radius: 12px;
+            }
+            
+            .timer-fixed .text-3xl {
+                font-size: 1.5rem;
+            }
+            
+            .timer-fixed .text-2xl {
+                font-size: 1.25rem;
+            }
+            
+            .protocol-document {
+                font-size: 12px;
+            }
+            
+            .input-field {
+                font-size: 12px;
+                min-width: 80px;
+            }
+            
+            body {
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .gradient-header {
+                padding: 1.5rem 0 !important;
+            }
+            
+            .gradient-header h1 {
+                font-size: 1.5rem !important;
+            }
+            
+            .timer-fixed {
+                bottom: 8px;
+                right: 8px;
+                padding: 8px 12px;
+            }
+            
+            .protocol-document {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="gradient-header text-white py-6 md:py-8 mb-6 md:mb-8">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <a href="../index.html" class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-3 md:px-4 py-2 rounded-lg transition text-sm md:text-base">
+                    <span>←</span>
+                    <span>На главную</span>
+                </a>
+                <div class="text-xs md:text-sm opacity-90">АНО ДПО «УЦИБ»</div>
+            </div>
+            <h1 class="text-2xl md:text-4xl font-bold mb-2">📑 Протокол заседания экспертной комиссии</h1>
+            <p class="text-base md:text-xl opacity-90">Тренажер по архивному делу</p>
+        </div>
+    </div>
+    
+    <!-- Фиксированный таймер -->
+    <div id="timer" class="timer-fixed no-print">
+        <div class="flex items-center gap-3">
+            <span class="text-3xl">⏱️</span>
+            <div>
+                <div class="text-xs opacity-90 font-medium">Осталось времени</div>
+                <div id="timer-display" class="text-2xl font-bold">10:00</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 pb-8">
+        <!-- Header -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6 no-print">
+            <div class="bg-orange-50 border-l-4 border-orange-500 p-4 mb-4 rounded-r-lg">
+                <p class="text-lg font-medium text-orange-900 mb-2">📝 Задание для студента:</p>
+                <p class="text-gray-700">
+                    Заполните "Протокол заседания экспертной комиссии" согласно предложенной ситуации.
+                    Внимательно изучите образец и заполните пропущенные поля.
+                </p>
+            </div>
+            
+            <!-- Situation Description -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <h3 class="font-semibold text-gray-800 mb-2">📌 Ситуация:</h3>
+                <p class="text-gray-700">
+                    Экспертная комиссия АНО ДПО «УЦИБ» проводит заседание 15 марта 2026 года. 
+                    Протоколу присвоен номер 3. Заседание проходит в г. Томск.
+                    Председатель комиссии - Скопа Н.М., секретарь - Фролова Е.М.
+                    На повестке дня - рассмотрение описи дел за 2023 год.
+                    Опись имеет номер 2.
+                </p>
+            </div>
+            
+            <div class="flex gap-4 mb-4">
+                <button onclick="checkAnswers()" class="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition shadow-md">
+                    ✓ Проверить ответы
+                </button>
+                <button onclick="resetForm()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition shadow-md">
+                    🔄 Сбросить
+                </button>
+            </div>
+            
+            <div id="result" class="hidden mt-4 p-4 rounded-lg"></div>
+        </div>
+        
+        <!-- Protocol Document -->
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <div class="protocol-document text-center">
+                <p class="font-bold">Автономная некоммерческая организация</p>
+                <p class="font-bold">Дополнительного профессионального образования</p>
+                <p class="font-bold">«Учебный центр информационной безопасности»</p>
+                <p class="font-bold">(АНО ДПО «УЦИБ»)</p>
+                
+                <p class="font-bold mt-6 text-xl">ПРОТОКОЛ</p>
+                
+                <div class="flex justify-between mt-4 px-12">
+                    <div>
+                        <input type="text" id="date" class="input-field" placeholder="Дата" data-answer="15.03.2024">
+                    </div>
+                    <div>
+                        № <input type="text" id="number" class="input-field w-24" placeholder="Номер" data-answer="3">
+                    </div>
+                </div>
+                
+                <p class="mt-4">
+                    <input type="text" id="city" class="input-field" placeholder="Город" data-answer="г. Томск">
+                </p>
+                
+                <p class="font-bold mt-4">заседания экспертной комиссии</p>
+            </div>
+            
+            <div class="protocol-document mt-6">
+                <p>Председатель – <input type="text" id="chairman" class="input-field w-48" placeholder="ФИО председателя" data-answer="Скопа Н.М."></p>
+                <p>Секретарь – <input type="text" id="secretary" class="input-field w-48" placeholder="ФИО секретаря" data-answer="Фролова Е.М."></p>
+                
+                <p class="mt-4">Присутствовали: главный бухгалтер А. Н. Майкова, секретарь Е. М. Фролова</p>
+                
+                <p class="font-bold mt-4">
+                    <input type="text" id="agenda" class="input-field w-48" placeholder="Раздел" data-answer="ПОВЕСТКА ДНЯ">:
+                </p>
+                <p>1. Рассмотрение и согласование описи дел по личному составу за 2023 год. Доклад архивиста Скопа Н.М.</p>
+                
+                <p class="font-bold mt-4">СЛУШАЛИ:</p>
+                <p>Скопа Н. М. – представила на согласование опись дел по личному составу за 
+                    <input type="text" id="year" class="input-field w-24" placeholder="Год" data-answer="2023"> год, 
+                    содержавшую 1 единицу хранения.
+                </p>
+                
+                <p class="font-bold mt-4">РЕШИЛИ:</p>
+                <p>Согласовать опись дел по личному составу № 
+                    <input type="text" id="opis_number" class="input-field w-24" placeholder="№" data-answer="2">, 
+                    и представить ее на утверждение директору АНО ДПО «УЦИБ».
+                </p>
+                
+                <div class="mt-8">
+                    <div class="flex justify-between px-12">
+                        <p>Председатель</p>
+                        <p><input type="text" id="chairman_sign" class="input-field w-48" placeholder="ФИО" data-answer="Н.М. Скопа"></p>
+                    </div>
+                    <div class="flex justify-between px-12 mt-2">
+                        <p>Секретарь</p>
+                        <p><input type="text" id="secretary_sign" class="input-field w-48" placeholder="ФИО" data-answer="Е.М. Фролова"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mt-6 no-print">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">📚 Подсказки:</h3>
+            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                <li>Дата протокола должна соответствовать дате проведения заседания</li>
+                <li>Номер протокола присваивается последовательно в течение года</li>
+                <li>ФИО должны быть указаны в правильном формате (Фамилия И.О.)</li>
+                <li>Обратите внимание на соответствие номера описи в тексте</li>
+                <li>Раздел "ПОВЕСТКА ДНЯ" - стандартный элемент протокола</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Определение режима
+        const urlParams = new URLSearchParams(window.location.search);
+        const isExamMode = urlParams.get('mode') === 'exam';
+        
+        // Настройки режима
+        const MODE_CONFIG = {
+            training: {
+                time: 600, // 10 минут
+                showHints: true,
+                allowMultipleAttempts: true,
+                title: '📑 Протокол заседания экспертной комиссии'
+            },
+            exam: {
+                time: 420, // 7 минут
+                showHints: false,
+                allowMultipleAttempts: false,
+                title: '🎓 Экзамен: Протокол заседания экспертной комиссии'
+            }
+        };
+        
+        const currentMode = isExamMode ? MODE_CONFIG.exam : MODE_CONFIG.training;
+        let attemptsMade = 0;
+        
+        // Обновляем заголовок
+        document.querySelector('.gradient-header h1').textContent = currentMode.title;
+        
+        // Добавляем индикатор режима
+        if (isExamMode) {
+            const header = document.querySelector('.gradient-header .max-w-6xl');
+            const examBadge = document.createElement('div');
+            examBadge.className = 'mt-4 inline-block bg-red-500 text-white px-6 py-2 rounded-full font-semibold';
+            examBadge.innerHTML = '⚠️ РЕЖИМ ЭКЗАМЕНА: Одна попытка, без подсказок';
+            header.appendChild(examBadge);
+        }
+        
+        // Correct answers based on the situation
+        const correctAnswers = {
+            date: '15.03.2026',
+            number: '3',
+            city: 'г. Томск',
+            chairman: 'Скопа Н.М.',
+            secretary: 'Фролова Е.М.',
+            agenda: 'ПОВЕСТКА ДНЯ',
+            year: '2023',
+            opis_number: '2',
+            chairman_sign: 'Н.М. Скопа',
+            secretary_sign: 'Е.М. Фролова'
+        };
+        
+        // Система сохранения прогресса
+        const STORAGE_KEY = 'archiveTraining_progress';
+        
+        function getProgress() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : {};
+        }
+        
+        function saveProgressData(trainerId, data) {
+            const progress = getProgress();
+            if (!progress[trainerId]) {
+                progress[trainerId] = {
+                    attempts: 0,
+                    bestScore: 0,
+                    bestTime: null,
+                    completed: false,
+                    lastAttempt: null
+                };
+            }
+            
+            progress[trainerId] = { ...progress[trainerId], ...data };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        function checkAnswers() {
+            // Проверка попыток в режиме экзамена
+            if (isExamMode && attemptsMade >= 1) {
+                return;
+            }
+            
+            let correct = 0;
+            let total = 0;
+            
+            for (let id in correctAnswers) {
+                const input = document.getElementById(id);
+                const userAnswer = input.value.trim();
+                const correctAnswer = correctAnswers[id];
+                
+                total++;
+                
+                if (userAnswer === correctAnswer) {
+                    input.classList.remove('incorrect');
+                    input.classList.add('correct');
+                    correct++;
+                } else if (userAnswer) {
+                    input.classList.remove('correct');
+                    input.classList.add('incorrect');
+                } else {
+                    input.classList.remove('correct', 'incorrect');
+                }
+            }
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.classList.remove('hidden');
+            
+            const percentage = Math.round((correct / total) * 100);
+            const timeSpent = startTime - timeLeft;
+            const progress = getProgress()['protokol-komissii'] || {};
+            const attempts = (progress.attempts || 0) + 1;
+            const isNewBest = correct > (progress.bestScore || 0);
+            const isFasterTime = !progress.bestTime || timeSpent < progress.bestTime;
+            
+            // Расчет оценки для режима экзамена
+            let grade = '';
+            let gradeColor = '';
+            
+            if (isExamMode) {
+                if (percentage >= 90) {
+                    grade = '5 (Отлично)';
+                    gradeColor = 'text-green-600';
+                } else if (percentage >= 75) {
+                    grade = '4 (Хорошо)';
+                    gradeColor = 'text-blue-600';
+                } else if (percentage >= 60) {
+                    grade = '3 (Удовлетворительно)';
+                    gradeColor = 'text-yellow-600';
+                } else {
+                    grade = '2 (Неудовлетворительно)';
+                    gradeColor = 'text-red-600';
+                }
+            }
+            
+            saveProgressData('protokol-komissii', {
+                attempts: attempts,
+                bestScore: isNewBest ? correct : progress.bestScore,
+                bestTime: (isNewBest || isFasterTime) ? timeSpent : progress.bestTime,
+                completed: percentage === 100,
+                lastAttempt: new Date().toISOString(),
+                lastScore: correct,
+                examGrade: isExamMode ? grade : null
+            });
+            
+            if (percentage === 100) {
+                resultDiv.className = 'mt-4 p-4 rounded-lg bg-green-100 border border-green-400 text-green-800';
+                resultDiv.innerHTML = `
+                    <p class="font-semibold text-lg">🎉 Отлично!</p>
+                    <p>Вы правильно заполнили все поля протокола (${correct}/${total}).</p>
+                    <div class="text-sm mt-2">Время: ${formatTime(timeSpent)} | Попытка: ${attempts}</div>
+                    ${isExamMode ? `<div class="text-3xl font-bold ${gradeColor} mt-4">Оценка: ${grade}</div>` : ''}
+                    ${!isExamMode && isNewBest ? '<div class="text-sm mt-1">🏆 Новый рекорд!</div>' : ''}
+                    ${!isExamMode && progress.bestScore ? `<div class="text-sm mt-1">Лучший результат: ${progress.bestScore}/${total} за ${formatTime(progress.bestTime)}</div>` : ''}
+                `;
+            } else if (percentage >= 70) {
+                resultDiv.className = 'mt-4 p-4 rounded-lg bg-yellow-100 border border-yellow-400 text-yellow-800';
+                resultDiv.innerHTML = `
+                    <p class="font-semibold text-lg">👍 Хорошо!</p>
+                    <p>Вы правильно заполнили ${correct} из ${total} полей (${percentage}%).</p>
+                    ${currentMode.showHints ? '<p>Проверьте поля, выделенные красным цветом.</p>' : '<p>Правильные ответы не показываются в режиме экзамена.</p>'}
+                    <div class="text-sm mt-2">Время: ${formatTime(timeSpent)} | Попытка: ${attempts}</div>
+                    ${isExamMode ? `<div class="text-3xl font-bold ${gradeColor} mt-4">Оценка: ${grade}</div>` : ''}
+                    ${!isExamMode && progress.bestScore ? `<div class="text-sm mt-1">Лучший результат: ${progress.bestScore}/${total} за ${formatTime(progress.bestTime)}</div>` : ''}
+                    ${isExamMode ? '<div class="text-sm text-red-600 mt-2">⚠️ В режиме экзамена доступна только одна попытка</div>' : ''}
+                `;
+            } else {
+                resultDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 border border-red-400 text-red-800';
+                resultDiv.innerHTML = `
+                    <p class="font-semibold text-lg">📝 Нужно доработать</p>
+                    <p>Вы правильно заполнили ${correct} из ${total} полей (${percentage}%).</p>
+                    ${currentMode.showHints ? '<p>Внимательно изучите ситуацию и попробуйте снова.</p>' : '<p>Правильные ответы не показываются в режиме экзамена.</p>'}
+                    <div class="text-sm mt-2">Время: ${formatTime(timeSpent)} | Попытка: ${attempts}</div>
+                    ${isExamMode ? `<div class="text-3xl font-bold ${gradeColor} mt-4">Оценка: ${grade}</div>` : ''}
+                    ${!isExamMode && progress.bestScore ? `<div class="text-sm mt-1">Лучший результат: ${progress.bestScore}/${total} за ${formatTime(progress.bestTime)}</div>` : ''}
+                    ${isExamMode ? '<div class="text-sm text-red-600 mt-2">⚠️ В режиме экзамена доступна только одна попытка</div>' : ''}
+                `;
+            }
+            
+            // Блокируем повторную проверку в режиме экзамена
+            if (isExamMode) {
+                attemptsMade++;
+                const checkButton = document.querySelector('button[onclick="checkAnswers()"]');
+                if (checkButton) {
+                    checkButton.disabled = true;
+                    checkButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    checkButton.textContent = '✓ Экзамен завершен';
+                }
+            }
+        }
+        
+
+        function resetForm() {
+            for (let id in correctAnswers) {
+                const input = document.getElementById(id);
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            }
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.classList.add('hidden');
+        }
+        
+        // Таймер
+        let timeLeft = currentMode.time;
+        let timerInterval;
+        let timerStarted = false;
+        let startTime = currentMode.time;
+
+        function startTimer() {
+            if (timerStarted) return;
+            timerStarted = true;
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeUp();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            const timerElement = document.getElementById('timer-display');
+            timerElement.textContent = display;
+            
+            if (timeLeft <= 120 && timeLeft > 0) {
+                document.getElementById('timer').classList.add('timer-warning');
+            }
+            
+            if (timeLeft <= 0) {
+                timerElement.textContent = '0:00';
+            }
+        }
+
+        function handleTimeUp() {
+            alert('⏰ Время вышло! Проверяем ваши ответы...');
+            checkAnswers();
+        }
+        
+        // Add Enter key support for moving between fields
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input[type="text"]');
+            inputs.forEach((input, index) => {
+                // Запуск таймера при первом фокусе
+                input.addEventListener('focus', startTimer, { once: true });
+                
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        } else {
+                            checkAnswers();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

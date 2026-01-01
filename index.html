@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажеры по архивному делу</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 2.5rem;
+            margin: 0 auto 1rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .gradient-bg h1 {
+                font-size: 2rem !important;
+            }
+            
+            .gradient-bg p {
+                font-size: 1rem !important;
+            }
+            
+            .icon-circle {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 1.5rem !important;
+            }
+            
+            .card h3 {
+                font-size: 1.25rem !important;
+            }
+            
+            .modal > div {
+                max-width: 100% !important;
+                margin: 0 1rem;
+            }
+            
+            .modal h2 {
+                font-size: 1.5rem !important;
+            }
+            
+            .modal .grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .gradient-bg {
+                padding: 2rem 0 !important;
+            }
+            
+            .gradient-bg h1 {
+                font-size: 1.75rem !important;
+            }
+            
+            body {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Модальное окно выбора режима -->
+    <div id="modeModal" class="modal">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 p-4 md:p-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6 text-center">Выберите режим</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
+                <!-- Режим обучения -->
+                <div id="trainingMode" class="border-2 border-blue-500 rounded-xl p-4 md:p-6 cursor-pointer hover:bg-blue-50 transition active:scale-95">
+                    <div class="text-center mb-3 md:mb-4">
+                        <div class="text-4xl md:text-5xl mb-2 md:mb-3">📚</div>
+                        <h3 class="text-xl md:text-2xl font-bold text-blue-600 mb-2">Обучение</h3>
+                    </div>
+                    <ul class="space-y-1 md:space-y-2 text-xs md:text-sm text-gray-700">
+                        <li>✓ Подсказки включены</li>
+                        <li>✓ Время: 10 минут</li>
+                        <li>✓ Неограниченные попытки</li>
+                        <li>✓ Проверка в реальном времени</li>
+                    </ul>
+                </div>
+                
+                <!-- Режим экзамена -->
+                <div id="examMode" class="border-2 border-red-500 rounded-xl p-4 md:p-6 cursor-pointer hover:bg-red-50 transition active:scale-95">
+                    <div class="text-center mb-3 md:mb-4">
+                        <div class="text-4xl md:text-5xl mb-2 md:mb-3">🎓</div>
+                        <h3 class="text-xl md:text-2xl font-bold text-red-600 mb-2">Экзамен</h3>
+                    </div>
+                    <ul class="space-y-1 md:space-y-2 text-xs md:text-sm text-gray-700">
+                        <li>✗ Без подсказок</li>
+                        <li>⏱️ Время: 7 минут</li>
+                        <li>⚠️ Одна попытка</li>
+                        <li>📊 Финальная оценка</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <button onclick="closeModal()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 md:py-3 rounded-lg transition text-sm md:text-base">
+                Отмена
+            </button>
+        </div>
+    </div>
+    
+    <!-- Header -->
+    <div class="gradient-bg text-white py-8 md:py-12 mb-8 md:mb-12">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-4">
+                <div class="text-center flex-1">
+                    <h1 class="text-3xl md:text-5xl font-bold mb-3 md:mb-4">📚 Тренажеры по архивному делу</h1>
+                    <p class="text-base md:text-xl opacity-90">Интерактивная система обучения для студентов</p>
+                    <p class="text-sm md:text-lg opacity-75 mt-2">АНО ДПО «УЦИБ»</p>
+                </div>
+                
+                <!-- Кнопка входа (для неавторизованных) -->
+                <div id="loginButton" class="absolute top-4 right-4">
+                    <a href="auth.html" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-4 py-2 rounded-lg transition font-medium text-sm">
+                        🔐 Вход
+                    </a>
+                </div>
+                
+                <!-- Информация о пользователе (для авторизованных) -->
+                <div id="userInfo" class="hidden absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-sm">
+                    <div id="userName" class="font-semibold"></div>
+                    <div id="userGroup" class="text-xs opacity-90"></div>
+                    <div id="adminLink" class="hidden mt-2">
+                        <a href="admin.html" class="text-xs underline hover:text-white/80 block">👨‍🏫 Админ-панель</a>
+                    </div>
+                    <button onclick="logout()" class="mt-2 text-xs underline hover:text-white/80">Выйти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 pb-12">
+        <!-- Info Block -->
+        <div class="max-w-4xl mx-auto mb-8 md:mb-12 bg-white rounded-xl shadow-lg p-4 md:p-6">
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 md:p-6 rounded-r-lg">
+                <h2 class="text-xl md:text-2xl font-bold text-blue-900 mb-2 md:mb-3">👋 Добро пожаловать!</h2>
+                <p class="text-blue-800 text-base md:text-lg mb-3 md:mb-4">
+                    Выберите тренажер для практической работы с архивными документами. 
+                    Каждый тренажер содержит интерактивные задания с автоматической проверкой ответов.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mt-4 md:mt-6">
+                    <div class="bg-white rounded-lg p-3 md:p-4 border-2 border-blue-200">
+                        <div class="flex items-center gap-2 md:gap-3 mb-2">
+                            <span class="text-2xl md:text-3xl">📚</span>
+                            <h3 class="text-lg md:text-xl font-bold text-blue-900">Режим обучения</h3>
+                        </div>
+                        <ul class="space-y-1 text-xs md:text-sm text-gray-700">
+                            <li>✓ Подсказки и правильные ответы</li>
+                            <li>✓ 10 минут на выполнение</li>
+                            <li>✓ Неограниченные попытки</li>
+                            <li>✓ Проверка в реальном времени</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-3 md:p-4 border-2 border-red-200">
+                        <div class="flex items-center gap-2 md:gap-3 mb-2">
+                            <span class="text-2xl md:text-3xl">🎓</span>
+                            <h3 class="text-lg md:text-xl font-bold text-red-900">Режим экзамена</h3>
+                        </div>
+                        <ul class="space-y-1 text-xs md:text-sm text-gray-700">
+                            <li>⚠️ Без подсказок и правильных ответов</li>
+                            <li>⏱️ 7 минут на выполнение</li>
+                            <li>🔒 Только одна попытка</li>
+                            <li>📊 Итоговая оценка: 5/4/3/2</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <p class="text-sm text-yellow-800">
+                        <strong>💡 Совет:</strong> Начните с режима обучения, чтобы освоить заполнение документов. 
+                        Когда будете готовы, попробуйте режим экзамена для проверки знаний!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- How to Work Section -->
+        <div class="max-w-4xl mx-auto mb-8 md:mb-12">
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 md:p-8 shadow-lg">
+                <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 text-center">🎯 Как работать с тренажерами?</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
+                    <div class="text-center">
+                        <div class="text-3xl md:text-4xl mb-2 md:mb-3">1️⃣</div>
+                        <h4 class="font-bold text-gray-800 mb-1 md:mb-2 text-sm md:text-base">Выберите тренажер</h4>
+                        <p class="text-xs md:text-sm text-gray-600">Нажмите на карточку интересующего документа</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-3xl md:text-4xl mb-2 md:mb-3">2️⃣</div>
+                        <h4 class="font-bold text-gray-800 mb-1 md:mb-2 text-sm md:text-base">Выберите режим</h4>
+                        <p class="text-xs md:text-sm text-gray-600">Обучение для практики или Экзамен для проверки</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-3xl md:text-4xl mb-2 md:mb-3">3️⃣</div>
+                        <h4 class="font-bold text-gray-800 mb-1 md:mb-2 text-sm md:text-base">Заполните документ</h4>
+                        <p class="text-xs md:text-sm text-gray-600">Следуйте инструкциям и проверьте результат</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg p-3 md:p-4 border-2 border-purple-200">
+                    <p class="text-center text-gray-700 text-sm md:text-base">
+                        <strong>📈 Ваш прогресс сохраняется автоматически!</strong><br>
+                        <span class="text-xs md:text-sm">Вы можете вернуться к тренажерам в любое время и продолжить обучение</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 max-w-6xl mx-auto">
+            <!-- Card 1 -->
+            <div class="card bg-white rounded-xl shadow-lg p-8 cursor-pointer" onclick="openModeModal('opis-del')">
+                <div class="icon-circle bg-purple-100 text-purple-600">
+                    📋
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 text-center">Опись дел по личному составу</h3>
+                <p class="text-gray-600 mb-4 text-center">
+                    Научитесь правильно заполнять опись дел по личному составу за 2023 год
+                </p>
+                
+                <!-- Прогресс -->
+                <div id="progress-opis-del" class="mb-4 hidden">
+                    <div class="bg-purple-50 rounded-lg p-3 mb-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-purple-700">Прогресс</span>
+                            <span class="text-sm font-bold text-purple-700" id="score-opis-del">0/11</span>
+                        </div>
+                        <div class="w-full bg-purple-200 rounded-full h-2">
+                            <div id="bar-opis-del" class="bg-purple-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-xs text-gray-600">
+                        <span id="attempts-opis-del">Попыток: 0</span>
+                        <span>•</span>
+                        <span id="time-opis-del">Лучшее время: -</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-gray-700"><strong>Проверяемых полей:</strong> 11</p>
+                    <p class="text-sm text-gray-700"><strong>Сложность:</strong> Средняя</p>
+                    <p class="text-sm text-gray-700"><strong>Время:</strong> 10 минут ⏱️</p>
+                </div>
+                <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg transition">
+                    Начать тренажер →
+                </button>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="card bg-white rounded-xl shadow-lg p-8 cursor-pointer" onclick="openModeModal('arhivnaya-spravka')">
+                <div class="icon-circle bg-blue-100 text-blue-600">
+                    📄
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 text-center">Архивная справка</h3>
+                <p class="text-gray-600 mb-4 text-center">
+                    Практика составления архивных справок по 5 различным вариантам
+                </p>
+                
+                <!-- Прогресс -->
+                <div id="progress-arhivnaya-spravka" class="mb-4 hidden">
+                    <div class="bg-blue-50 rounded-lg p-3 mb-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-blue-700">Прогресс</span>
+                            <span class="text-sm font-bold text-blue-700" id="score-arhivnaya-spravka">0/16</span>
+                        </div>
+                        <div class="w-full bg-blue-200 rounded-full h-2">
+                            <div id="bar-arhivnaya-spravka" class="bg-blue-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-xs text-gray-600">
+                        <span id="attempts-arhivnaya-spravka">Попыток: 0</span>
+                        <span>•</span>
+                        <span id="time-arhivnaya-spravka">Лучшее время: -</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-gray-700"><strong>Проверяемых полей:</strong> 16</p>
+                    <p class="text-sm text-gray-700"><strong>Сложность:</strong> Высокая</p>
+                    <p class="text-sm text-gray-700"><strong>Время:</strong> 10 минут ⏱️</p>
+                </div>
+                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
+                    Начать тренажер →
+                </button>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="card bg-white rounded-xl shadow-lg p-8 cursor-pointer" onclick="openModeModal('list-ispolzovaniya')">
+                <div class="icon-circle bg-green-100 text-green-600">
+                    📝
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 text-center">Лист использования документов</h3>
+                <p class="text-gray-600 mb-4 text-center">
+                    Заполнение листа использования архивных документов
+                </p>
+                
+                <!-- Прогресс -->
+                <div id="progress-list-ispolzovaniya" class="mb-4 hidden">
+                    <div class="bg-green-50 rounded-lg p-3 mb-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-green-700">Прогресс</span>
+                            <span class="text-sm font-bold text-green-700" id="score-list-ispolzovaniya">0/8</span>
+                        </div>
+                        <div class="w-full bg-green-200 rounded-full h-2">
+                            <div id="bar-list-ispolzovaniya" class="bg-green-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-xs text-gray-600">
+                        <span id="attempts-list-ispolzovaniya">Попыток: 0</span>
+                        <span>•</span>
+                        <span id="time-list-ispolzovaniya">Лучшее время: -</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-gray-700"><strong>Проверяемых полей:</strong> 8</p>
+                    <p class="text-sm text-gray-700"><strong>Сложность:</strong> Низкая</p>
+                    <p class="text-sm text-gray-700"><strong>Время:</strong> 10 минут ⏱️</p>
+                </div>
+                <button class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition">
+                    Начать тренажер →
+                </button>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="card bg-white rounded-xl shadow-lg p-8 cursor-pointer" onclick="openModeModal('protokol-komissii')">
+                <div class="icon-circle bg-orange-100 text-orange-600">
+                    📑
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 text-center">Протокол заседания экспертной комиссии</h3>
+                <p class="text-gray-600 mb-4 text-center">
+                    Оформление протокола заседания экспертной комиссии
+                </p>
+                
+                <!-- Прогресс -->
+                <div id="progress-protokol-komissii" class="mb-4 hidden">
+                    <div class="bg-orange-50 rounded-lg p-3 mb-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-orange-700">Прогресс</span>
+                            <span class="text-sm font-bold text-orange-700" id="score-protokol-komissii">0/10</span>
+                        </div>
+                        <div class="w-full bg-orange-200 rounded-full h-2">
+                            <div id="bar-protokol-komissii" class="bg-orange-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-xs text-gray-600">
+                        <span id="attempts-protokol-komissii">Попыток: 0</span>
+                        <span>•</span>
+                        <span id="time-protokol-komissii">Лучшее время: -</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-gray-700"><strong>Проверяемых полей:</strong> 10</p>
+                    <p class="text-sm text-gray-700"><strong>Сложность:</strong> Средняя</p>
+                    <p class="text-sm text-gray-700"><strong>Время:</strong> 10 минут ⏱️</p>
+                </div>
+                <button class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 rounded-lg transition">
+                    Начать тренажер →
+                </button>
+            </div>
+        </div>
+
+        <!-- Новые тренажеры -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 max-w-6xl mx-auto mt-4 md:mt-8">
+            <!-- Card 5 - Номенклатура дел -->
+            <div class="card bg-white rounded-xl shadow-lg p-8 cursor-pointer" onclick="openModeModal('nomenklatura-del')">
+                <div class="icon-circle bg-cyan-100 text-cyan-600">
+                    📑
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 text-center">Номенклатура дел</h3>
+                <p class="text-gray-600 mb-4 text-center">
+                    Заполнение номенклатуры дел организации на 2024 год
+                </p>
+                
+                <!-- Прогресс -->
+                <div id="progress-nomenklatura-del" class="mb-4 hidden">
+                    <div class="bg-cyan-50 rounded-lg p-3 mb-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-cyan-700">Прогресс</span>
+                            <span class="text-sm font-bold text-cyan-700" id="score-nomenklatura-del">0/15</span>
+                        </div>
+                        <div class="w-full bg-cyan-200 rounded-full h-2">
+                            <div id="bar-nomenklatura-del" class="bg-cyan-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-xs text-gray-600">
+                        <span id="attempts-nomenklatura-del">Попыток: 0</span>
+                        <span>•</span>
+                        <span id="time-nomenklatura-del">Лучшее время: -</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-gray-700"><strong>Проверяемых полей:</strong> 15</p>
+                    <p class="text-sm text-gray-700"><strong>Сложность:</strong> Средняя</p>
+                    <p class="text-sm text-gray-700"><strong>Время:</strong> 10 минут ⏱️</p>
+                </div>
+                <button class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 rounded-lg transition">
+                    Начать тренажер →
+                </button>
+            </div>
+
+            <!-- Card 6 - Акт уничтожения -->
+            <div class="card bg-white rounded-xl shadow-lg p-8 cursor-pointer" onclick="openModeModal('akt-unichtozheniya')">
+                <div class="icon-circle bg-red-100 text-red-600">
+                    🗑️
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 text-center">Акт о выделении к уничтожению</h3>
+                <p class="text-gray-600 mb-4 text-center">
+                    Оформление акта на уничтожение документов
+                </p>
+                
+                <!-- Прогресс -->
+                <div id="progress-akt-unichtozheniya" class="mb-4 hidden">
+                    <div class="bg-red-50 rounded-lg p-3 mb-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-red-700">Прогресс</span>
+                            <span class="text-sm font-bold text-red-700" id="score-akt-unichtozheniya">0/16</span>
+                        </div>
+                        <div class="w-full bg-red-200 rounded-full h-2">
+                            <div id="bar-akt-unichtozheniya" class="bg-red-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-xs text-gray-600">
+                        <span id="attempts-akt-unichtozheniya">Попыток: 0</span>
+                        <span>•</span>
+                        <span id="time-akt-unichtozheniya">Лучшее время: -</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-gray-700"><strong>Проверяемых полей:</strong> 16</p>
+                    <p class="text-sm text-gray-700"><strong>Сложность:</strong> Высокая</p>
+                    <p class="text-sm text-gray-700"><strong>Время:</strong> 10 минут ⏱️</p>
+                </div>
+                <button class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition">
+                    Начать тренажер →
+                </button>
+            </div>
+
+            <!-- Card 7 - Обложка дела -->
+            <div class="card bg-white rounded-xl shadow-lg p-8 cursor-pointer" onclick="openModeModal('oblozhka-dela')">
+                <div class="icon-circle bg-violet-100 text-violet-600">
+                    📕
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 text-center">Обложка дела</h3>
+                <p class="text-gray-600 mb-4 text-center">
+                    Правильное оформление обложки архивного дела
+                </p>
+                
+                <!-- Прогресс -->
+                <div id="progress-oblozhka-dela" class="mb-4 hidden">
+                    <div class="bg-violet-50 rounded-lg p-3 mb-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-violet-700">Прогресс</span>
+                            <span class="text-sm font-bold text-violet-700" id="score-oblozhka-dela">0/10</span>
+                        </div>
+                        <div class="w-full bg-violet-200 rounded-full h-2">
+                            <div id="bar-oblozhka-dela" class="bg-violet-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-xs text-gray-600">
+                        <span id="attempts-oblozhka-dela">Попыток: 0</span>
+                        <span>•</span>
+                        <span id="time-oblozhka-dela">Лучшее время: -</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-gray-700"><strong>Проверяемых полей:</strong> 10</p>
+                    <p class="text-sm text-gray-700"><strong>Сложность:</strong> Низкая</p>
+                    <p class="text-sm text-gray-700"><strong>Время:</strong> 10 минут ⏱️</p>
+                </div>
+                <button class="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-lg transition">
+                    Начать тренажер →
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="max-w-4xl mx-auto mt-8 md:mt-12 bg-white rounded-xl shadow-lg p-4 md:p-8">
+            <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6 text-center">📊 Статистика обучения</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div class="text-center p-4 md:p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+                    <div class="text-3xl md:text-4xl font-bold text-purple-600 mb-1 md:mb-2">7</div>
+                    <div class="text-gray-700 text-sm md:text-base">Доступных тренажеров</div>
+                </div>
+                <div class="text-center p-4 md:p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                    <div class="text-3xl md:text-4xl font-bold text-blue-600 mb-1 md:mb-2">86</div>
+                    <div class="text-gray-700 text-sm md:text-base">Проверяемых полей</div>
+                </div>
+                <div class="text-center p-4 md:p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+                    <div class="text-3xl md:text-4xl font-bold text-green-600 mb-1 md:mb-2">10 мин</div>
+                    <div class="text-gray-700 text-sm md:text-base">На каждый тренажер</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="max-w-4xl mx-auto mt-4 md:mt-6 text-center text-gray-600 px-4">
+            <p class="text-xs md:text-sm">Все тренажеры работают в браузере и не требуют установки</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK и авторизация -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Конфигурация Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD93IuoTh8YwNYoG7bHkbexYBWWn6M4mh0",
+            authDomain: "dasha-70548.firebaseapp.com",
+            databaseURL: "https://dasha-70548-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "dasha-70548",
+            storageBucket: "dasha-70548.firebasestorage.app",
+            messagingSenderId: "525898558720",
+            appId: "1:525898558720:web:2bc4cdbabf4dd7056817e5"
+        };
+
+        // Инициализация Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // Проверка авторизации
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Пользователь авторизован
+                const userRef = ref(database, 'users/' + user.uid);
+                const snapshot = await get(userRef);
+                
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    document.getElementById('userName').textContent = `${userData.firstName} ${userData.lastName}`;
+                    document.getElementById('userGroup').textContent = `Группа: ${userData.group}`;
+                    document.getElementById('userInfo').classList.remove('hidden');
+                    document.getElementById('loginButton').classList.add('hidden');
+                    
+                    // Показываем ссылку на админ-панель для администраторов
+                    if (userData.role === 'admin') {
+                        document.getElementById('adminLink').classList.remove('hidden');
+                    }
+                    
+                    // Сохраняем данные пользователя для использования в тренажерах
+                    window.currentUser = {
+                        uid: user.uid,
+                        ...userData
+                    };
+                }
+            } else {
+                // Пользователь не авторизован - показываем кнопку входа
+                document.getElementById('loginButton').classList.remove('hidden');
+                document.getElementById('userInfo').classList.add('hidden');
+            }
+        });
+
+        // Функция выхода
+        window.logout = async () => {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                await signOut(auth);
+                window.location.reload();
+            }
+        };
+    </script>
+
+    <script>
+        let selectedTrainer = '';
+        
+        // Открыть модальное окно выбора режима
+        function openModeModal(trainerId) {
+            selectedTrainer = trainerId;
+            document.getElementById('modeModal').classList.add('show');
+        }
+        
+        // Закрыть модальное окно
+        function closeModal() {
+            document.getElementById('modeModal').classList.remove('show');
+            selectedTrainer = '';
+        }
+        
+        // Обработчики выбора режима
+        document.getElementById('trainingMode').addEventListener('click', function() {
+            if (selectedTrainer) {
+                window.location.href = `trainers/${selectedTrainer}.html`;
+            }
+        });
+        
+        document.getElementById('examMode').addEventListener('click', function() {
+            if (selectedTrainer) {
+                window.location.href = `trainers/${selectedTrainer}.html?mode=exam`;
+            }
+        });
+        
+        // Закрытие по клику вне модального окна
+        document.getElementById('modeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // Загрузка прогресса
+        function getProgress() {
+            const data = localStorage.getItem('archiveTraining_progress');
+            return data ? JSON.parse(data) : {};
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        function getTotalFields(trainerId) {
+            const totals = {
+                'opis-del': 11,
+                'arhivnaya-spravka': 16,
+                'list-ispolzovaniya': 8,
+                'protokol-komissii': 10,
+                'nomenklatura-del': 15,
+                'akt-unichtozheniya': 16,
+                'oblozhka-dela': 10
+            };
+            return totals[trainerId] || 0;
+        }
+        
+        function updateProgressBadges() {
+            const progress = getProgress();
+            
+            // Обновляем каждый тренажер
+            Object.keys(progress).forEach(trainerId => {
+                const data = progress[trainerId];
+                const totalFields = getTotalFields(trainerId);
+                
+                // Показываем блок прогресса
+                const progressBlock = document.getElementById(`progress-${trainerId}`);
+                if (progressBlock && data.attempts > 0) {
+                    progressBlock.classList.remove('hidden');
+                    
+                    // Обновляем счет
+                    const scoreElement = document.getElementById(`score-${trainerId}`);
+                    if (scoreElement) {
+                        scoreElement.textContent = `${data.bestScore || 0}/${totalFields}`;
+                    }
+                    
+                    // Обновляем прогресс-бар
+                    const barElement = document.getElementById(`bar-${trainerId}`);
+                    if (barElement) {
+                        const percentage = ((data.bestScore || 0) / totalFields) * 100;
+                        barElement.style.width = `${percentage}%`;
+                    }
+                    
+                    // Обновляем попытки
+                    const attemptsElement = document.getElementById(`attempts-${trainerId}`);
+                    if (attemptsElement) {
+                        attemptsElement.textContent = `Попыток: ${data.attempts}`;
+                    }
+                    
+                    // Обновляем время
+                    const timeElement = document.getElementById(`time-${trainerId}`);
+                    if (timeElement && data.bestTime) {
+                        timeElement.textContent = `Лучшее время: ${formatTime(data.bestTime)}`;
+                    }
+                }
+                
+                // Добавляем бейдж "Пройдено" если завершено
+                if (data.completed) {
+                    const cards = document.querySelectorAll('.card');
+                    const trainerIds = ['opis-del', 'arhivnaya-spravka', 'list-ispolzovaniya', 'protokol-komissii'];
+                    const index = trainerIds.indexOf(trainerId);
+                    const card = cards[index];
+                    
+                    if (card && !card.querySelector('.completion-badge')) {
+                        // Добавляем бейдж "Пройдено"
+                        const badge = document.createElement('div');
+                        badge.className = 'completion-badge absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg flex items-center gap-1';
+                        badge.innerHTML = '<span>✓</span><span>Пройдено</span>';
+                        card.style.position = 'relative';
+                        card.insertBefore(badge, card.firstChild);
+                    }
+                }
+            });
+            
+            // Обновляем общую статистику
+            updateOverallStats(progress);
+        }
+        
+        function updateOverallStats(progress) {
+            const totalTrainers = 7;
+            const completedTrainers = Object.values(progress).filter(p => p.completed).length;
+            const totalAttempts = Object.values(progress).reduce((sum, p) => sum + (p.attempts || 0), 0);
+            
+            // Обновляем карточки статистики
+            const statsCards = document.querySelectorAll('.max-w-4xl .grid > div');
+            if (statsCards.length >= 3) {
+                // Обновляем "Доступных тренажера" на "Пройдено тренажеров"
+                if (completedTrainers > 0) {
+                    statsCards[0].innerHTML = `
+                        <div class="text-4xl font-bold text-purple-600 mb-2">${completedTrainers}/${totalTrainers}</div>
+                        <div class="text-gray-700">Пройдено тренажеров</div>
+                    `;
+                }
+                
+                // Обновляем "Проверяемых полей" на общее количество попыток
+                if (totalAttempts > 0) {
+                    statsCards[1].innerHTML = `
+                        <div class="text-4xl font-bold text-blue-600 mb-2">${totalAttempts}</div>
+                        <div class="text-gray-700">Всего попыток</div>
+                    `;
+                }
+            }
+        }
+        
+        // Загружаем прогресс при загрузке страницы
+        document.addEventListener('DOMContentLoaded', updateProgressBadges);
+    </script>
+</body>
+</html>

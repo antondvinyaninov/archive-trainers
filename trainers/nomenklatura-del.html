@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажер: Номенклатура дел</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-header {
+            background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+        }
+        
+        .timer-fixed {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(8, 145, 178, 0.4);
+        }
+        
+        .timer-warning {
+            animation: pulse 1s infinite;
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .gradient-header h1 {
+                font-size: 1.75rem !important;
+            }
+            
+            .gradient-header p {
+                font-size: 1rem !important;
+            }
+            
+            .timer-fixed {
+                bottom: 12px;
+                right: 12px;
+                padding: 12px 16px;
+                border-radius: 12px;
+            }
+            
+            .timer-fixed .text-3xl {
+                font-size: 1.5rem;
+            }
+            
+            .timer-fixed .text-2xl {
+                font-size: 1.25rem;
+            }
+            
+            .document-table {
+                font-size: 11px;
+            }
+            
+            .document-table input {
+                font-size: 11px;
+                padding: 2px;
+            }
+            
+            body {
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .gradient-header {
+                padding: 1.5rem 0 !important;
+            }
+            
+            .gradient-header h1 {
+                font-size: 1.5rem !important;
+            }
+            
+            .timer-fixed {
+                bottom: 8px;
+                right: 8px;
+                padding: 8px 12px;
+            }
+            
+            .document-table {
+                font-size: 10px;
+            }
+        }
+        
+        .correct { background-color: #d1fae5 !important; }
+        .incorrect { background-color: #fee2e2 !important; }
+        
+        .document-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 13px;
+        }
+        .document-table td, .document-table th {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .document-table input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 13px;
+            padding: 4px;
+        }
+        .document-table input:focus {
+            outline: none;
+            background-color: #f0f9ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="gradient-header text-white py-6 md:py-8 mb-6 md:mb-8">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <a href="../index.html" class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-3 md:px-4 py-2 rounded-lg transition text-sm md:text-base">
+                    <span>←</span>
+                    <span>На главную</span>
+                </a>
+                <div class="text-xs md:text-sm opacity-90">АНО ДПО «УЦИБ»</div>
+            </div>
+            <h1 class="text-2xl md:text-4xl font-bold mb-2">📑 Номенклатура дел</h1>
+            <p class="text-base md:text-xl opacity-90">Тренажер по архивному делу</p>
+        </div>
+    </div>
+    
+    <!-- Фиксированный таймер -->
+    <div id="timer" class="timer-fixed">
+        <div class="flex items-center gap-3">
+            <span class="text-3xl">⏱️</span>
+            <div>
+                <div class="text-xs opacity-90 font-medium">Осталось времени</div>
+                <div id="timer-display" class="text-2xl font-bold">10:00</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 pb-8">
+        <!-- Инструкция -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="bg-cyan-50 border-l-4 border-cyan-500 p-4 rounded-r-lg">
+                <h3 class="font-bold text-cyan-800 mb-3 text-lg">📝 Задание для студента</h3>
+                <p class="text-gray-700 mb-3">Заполните "Номенклатуру дел" на 2024 год согласно ситуации:</p>
+                <div class="space-y-2 text-gray-700 text-sm">
+                    <div><strong>Организация:</strong> АНО ДПО «УЦИБ»</div>
+                    <div><strong>Структурное подразделение:</strong> Отдел кадров</div>
+                    <div><strong>Индекс дела:</strong> укажите индекс согласно структуре (01 - отдел кадров)</div>
+                    <div><strong>Заголовок дела:</strong> укажите точное название документа</div>
+                    <div><strong>Количество дел:</strong> планируемое количество томов/частей</div>
+                    <div><strong>Срок хранения:</strong> согласно перечню (приказы - постоянно, личные дела - 50 лет)</div>
+                    <div><strong>Примечание:</strong> укажите статью перечня или особые отметки</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Документ -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="text-center mb-6">
+                <p class="font-bold text-lg">Автономная некоммерческая организация</p>
+                <p class="font-bold text-lg">дополнительного профессионального образования</p>
+                <p class="font-bold text-lg">«Учебный центр информационной безопасности»</p>
+                <p class="font-bold text-lg mb-4">(АНО ДПО «УЦИБ»)</p>
+                
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-left">
+                        <p class="font-bold">УТВЕРЖДАЮ</p>
+                        <p>Директор АНО ДПО «УЦИБ»</p>
+                        <p class="mt-2">_________ В.А. Елисеев</p>
+                        <p>«___» __________ 2024 г.</p>
+                    </div>
+                </div>
+                
+                <h2 class="text-xl font-bold mt-6 mb-2">НОМЕНКЛАТУРА ДЕЛ</h2>
+                <p class="mb-4">на 2024 год</p>
+                <p class="text-left mb-4">Структурное подразделение: <strong>Отдел кадров</strong></p>
+            </div>
+
+            <!-- Таблица -->
+            <table class="document-table mb-6">
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">Индекс дела</th>
+                        <th style="width: 35%;">Заголовок дела</th>
+                        <th style="width: 10%;">Кол-во дел</th>
+                        <th style="width: 15%;">Срок хранения</th>
+                        <th style="width: 30%;">Примечание</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>3</td>
+                        <td>4</td>
+                        <td>5</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Строка 1 -->
+                    <tr>
+                        <td><input type="text" id="index1" placeholder="01-__"></td>
+                        <td><input type="text" id="title1" placeholder="Заголовок дела"></td>
+                        <td><input type="text" id="count1" placeholder="1"></td>
+                        <td><input type="text" id="period1" placeholder="Срок"></td>
+                        <td><input type="text" id="note1" placeholder="Примечание"></td>
+                    </tr>
+                    <!-- Строка 2 -->
+                    <tr>
+                        <td><input type="text" id="index2" placeholder="01-__"></td>
+                        <td><input type="text" id="title2" placeholder="Заголовок дела"></td>
+                        <td><input type="text" id="count2" placeholder="1"></td>
+                        <td><input type="text" id="period2" placeholder="Срок"></td>
+                        <td><input type="text" id="note2" placeholder="Примечание"></td>
+                    </tr>
+                    <!-- Строка 3 -->
+                    <tr>
+                        <td><input type="text" id="index3" placeholder="01-__"></td>
+                        <td><input type="text" id="title3" placeholder="Заголовок дела"></td>
+                        <td><input type="text" id="count3" placeholder="1"></td>
+                        <td><input type="text" id="period3" placeholder="Срок"></td>
+                        <td><input type="text" id="note3" placeholder="Примечание"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="mt-8 text-sm">
+                <p class="mb-4">Итого ______ дел</p>
+                <div class="flex justify-between">
+                    <div>
+                        <p>Начальник отдела кадров</p>
+                        <p class="mt-2">_________ И.О. Фамилия</p>
+                    </div>
+                    <div>
+                        <p>Дата: «___» __________ 2024 г.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки -->
+        <div class="text-center mb-8">
+            <button id="check-button" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition shadow-lg">
+                ✓ Проверить заполнение
+            </button>
+            <button onclick="resetForm()" class="ml-4 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg text-lg transition shadow-lg">
+                🔄 Сбросить
+            </button>
+        </div>
+
+        <!-- Результаты -->
+        <div id="results" class="hidden bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Результаты проверки</h3>
+            <div id="result-message" class="text-center text-lg mb-4"></div>
+            <div id="score" class="text-center mb-4"></div>
+        </div>
+
+        <!-- Прогресс -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h4 class="font-bold text-gray-800 mb-4 text-lg">📊 Статистика заполнения:</h4>
+            <div class="flex items-center gap-4">
+                <div class="flex-1 bg-gray-200 rounded-full h-6">
+                    <div id="progress-bar" class="bg-cyan-600 h-6 rounded-full transition-all duration-500 flex items-center justify-center text-white text-sm font-semibold" style="width: 0%"></div>
+                </div>
+                <span id="progress-text" class="font-bold text-lg text-gray-700">0/15</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Определение режима
+        const urlParams = new URLSearchParams(window.location.search);
+        const isExamMode = urlParams.get('mode') === 'exam';
+        
+        // Настройки режима
+        const MODE_CONFIG = {
+            training: {
+                time: 600, // 10 минут
+                showHints: true,
+                allowMultipleAttempts: true,
+                title: '📑 Номенклатура дел'
+            },
+            exam: {
+                time: 420, // 7 минут
+                showHints: false,
+                allowMultipleAttempts: false,
+                title: '🎓 Экзамен: Номенклатура дел'
+            }
+        };
+        
+        const currentMode = isExamMode ? MODE_CONFIG.exam : MODE_CONFIG.training;
+        let attemptsMade = 0;
+        
+        // Обновляем заголовок
+        document.querySelector('.gradient-header h1').textContent = currentMode.title;
+        
+        // Добавляем индикатор режима
+        if (isExamMode) {
+            const header = document.querySelector('.gradient-header .max-w-6xl');
+            const examBadge = document.createElement('div');
+            examBadge.className = 'mt-4 inline-block bg-red-500 text-white px-6 py-2 rounded-full font-semibold';
+            examBadge.innerHTML = '⚠️ РЕЖИМ ЭКЗАМЕНА: Одна попытка, без подсказок';
+            header.appendChild(examBadge);
+        }
+        
+        // Эталонные ответы
+        const correctAnswers = {
+            index1: '01-01',
+            title1: 'Приказы по основной деятельности',
+            count1: '1',
+            period1: 'Постоянно',
+            note1: 'ст. 19 Перечня',
+            
+            index2: '01-02',
+            title2: 'Приказы по личному составу',
+            count2: '1',
+            period2: '50 лет',
+            note2: 'ст. 19 Перечня',
+            
+            index3: '01-03',
+            title3: 'Личные дела работников',
+            count3: '1',
+            period3: '50 лет',
+            note3: 'ст. 656 Перечня'
+        };
+
+        const totalFields = Object.keys(correctAnswers).length;
+
+        // Система сохранения прогресса
+        const STORAGE_KEY = 'archiveTraining_progress';
+        
+        function getProgress() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : {};
+        }
+        
+        function saveProgress(trainerId, data) {
+            const progress = getProgress();
+            if (!progress[trainerId]) {
+                progress[trainerId] = {
+                    attempts: 0,
+                    bestScore: 0,
+                    bestTime: null,
+                    completed: false,
+                    lastAttempt: null
+                };
+            }
+            
+            progress[trainerId] = { ...progress[trainerId], ...data };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Таймер
+        let timeLeft = currentMode.time;
+        let timerInterval;
+        let timerStarted = false;
+        let startTime = currentMode.time;
+
+        function startTimer() {
+            if (timerStarted) return;
+            timerStarted = true;
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeUp();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            const timerElement = document.getElementById('timer-display');
+            timerElement.textContent = display;
+            
+            if (timeLeft <= 120 && timeLeft > 0) {
+                document.getElementById('timer').classList.add('timer-warning');
+            }
+            
+            if (timeLeft <= 0) {
+                timerElement.textContent = '0:00';
+            }
+        }
+
+        function handleTimeUp() {
+            alert('⏰ Время вышло! Проверяем ваши ответы...');
+            checkAnswers();
+        }
+
+        // Проверка ответов
+        function checkAnswers() {
+            // Проверка попыток в режиме экзамена
+            if (isExamMode && attemptsMade >= 1) {
+                return;
+            }
+            
+            let correctCount = 0;
+            
+            Object.keys(correctAnswers).forEach(fieldId => {
+                const input = document.getElementById(fieldId);
+                const userAnswer = input.value.trim();
+                const correctAnswer = correctAnswers[fieldId];
+                
+                input.classList.remove('correct', 'incorrect');
+                
+                if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+                    input.classList.add('correct');
+                    correctCount++;
+                } else if (userAnswer) {
+                    input.classList.add('incorrect');
+                }
+            });
+            
+            updateProgress(correctCount);
+            showResults(correctCount);
+        }
+
+        function updateProgress(correctCount) {
+            const percentage = (correctCount / totalFields) * 100;
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            progressBar.style.width = `${percentage}%`;
+            progressBar.textContent = `${Math.round(percentage)}%`;
+            progressText.textContent = `${correctCount}/${totalFields}`;
+        }
+
+        function showResults(correctCount) {
+            const resultsDiv = document.getElementById('results');
+            const resultMessage = document.getElementById('result-message');
+            const scoreDiv = document.getElementById('score');
+            
+            resultsDiv.classList.remove('hidden');
+            
+            const timeSpent = startTime - timeLeft;
+            const progress = getProgress()['nomenklatura-del'] || {};
+            const attempts = (progress.attempts || 0) + 1;
+            const isNewBest = correctCount > (progress.bestScore || 0);
+            const isFasterTime = !progress.bestTime || timeSpent < progress.bestTime;
+            
+            // Расчет оценки для режима экзамена
+            const percentage = (correctCount / totalFields) * 100;
+            let grade = '';
+            let gradeColor = '';
+            
+            if (isExamMode) {
+                if (percentage >= 90) {
+                    grade = '5 (Отлично)';
+                    gradeColor = 'text-green-600';
+                } else if (percentage >= 75) {
+                    grade = '4 (Хорошо)';
+                    gradeColor = 'text-blue-600';
+                } else if (percentage >= 60) {
+                    grade = '3 (Удовлетворительно)';
+                    gradeColor = 'text-yellow-600';
+                } else {
+                    grade = '2 (Неудовлетворительно)';
+                    gradeColor = 'text-red-600';
+                }
+            }
+            
+            saveProgress('nomenklatura-del', {
+                attempts: attempts,
+                bestScore: isNewBest ? correctCount : progress.bestScore,
+                bestTime: (isNewBest || isFasterTime) ? timeSpent : progress.bestTime,
+                completed: correctCount === totalFields,
+                lastAttempt: new Date().toISOString(),
+                lastScore: correctCount,
+                examGrade: isExamMode ? grade : null
+            });
+            
+            if (correctCount === totalFields) {
+                resultMessage.innerHTML = `
+                    <span class="text-green-600 font-bold">🎉 Отлично! Номенклатура заполнена верно!</span>
+                    ${isExamMode ? `<div class="text-3xl font-bold ${gradeColor} mt-4">Оценка: ${grade}</div>` : ''}
+                    ${!isExamMode && isNewBest ? '<div class="text-sm text-green-600 mt-2">🏆 Новый рекорд!</div>' : ''}
+                `;
+            } else {
+                resultMessage.innerHTML = `
+                    <span class="text-red-600 font-bold">⚠️ Есть ошибки в заполнении</span>
+                    ${isExamMode ? `<div class="text-3xl font-bold ${gradeColor} mt-4">Оценка: ${grade}</div>` : ''}
+                `;
+            }
+            
+            scoreDiv.innerHTML = `
+                <div>Правильно заполнено: ${correctCount} из ${totalFields} полей</div>
+                <div class="text-sm text-gray-600 mt-2">Время: ${formatTime(timeSpent)} | Попытка: ${attempts}</div>
+                ${!isExamMode && progress.bestScore ? `<div class="text-sm text-cyan-600 mt-1">Лучший результат: ${progress.bestScore}/${totalFields} за ${formatTime(progress.bestTime)}</div>` : ''}
+                ${isExamMode ? '<div class="text-sm text-red-600 mt-2">⚠️ В режиме экзамена доступна только одна попытка</div>' : ''}
+            `;
+            
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            
+            // Блокируем повторную проверку в режиме экзамена
+            if (isExamMode) {
+                attemptsMade++;
+                document.getElementById('check-button').disabled = true;
+                document.getElementById('check-button').classList.add('opacity-50', 'cursor-not-allowed');
+                document.getElementById('check-button').textContent = '✓ Экзамен завершен';
+            }
+        }
+
+        function resetForm() {
+            Object.keys(correctAnswers).forEach(fieldId => {
+                const input = document.getElementById(fieldId);
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            });
+            
+            document.getElementById('results').classList.add('hidden');
+            updateProgress(0);
+        }
+
+        // Запуск таймера при первом вводе
+        document.addEventListener('DOMContentLoaded', () => {
+            Object.keys(correctAnswers).forEach(fieldId => {
+                const input = document.getElementById(fieldId);
+                input.addEventListener('focus', startTimer, { once: true });
+            });
+        });
+
+        // Кнопка проверки
+        document.getElementById('check-button').addEventListener('click', checkAnswers);
+
+        // Инициализация
+        updateProgress(0);
+    </script>
+</body>
+</html>

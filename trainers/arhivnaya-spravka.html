@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажер: Архивная справка</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+        
+        .document-font {
+            font-family: 'Times New Roman', Times, serif;
+        }
+        
+        .field-correct {
+            background-color: #d1fae5 !important;
+            border-color: #10b981 !important;
+        }
+        
+        .field-incorrect {
+            background-color: #fee2e2 !important;
+            border-color: #ef4444 !important;
+        }
+        
+        .hint-box {
+            display: none;
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-top: 4px;
+            font-size: 12px;
+            color: #92400e;
+        }
+        
+        .hint-box.show {
+            display: block;
+        }
+        
+        .document-input {
+            border: none;
+            border-bottom: 1px solid #000;
+            background: transparent;
+            padding: 2px 4px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+            min-width: 150px;
+        }
+        
+        .document-input:focus {
+            outline: none;
+            background-color: #f0f9ff;
+        }
+        
+        .success-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .success-overlay.show {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        .timer-fixed {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+        }
+        
+        .timer-warning {
+            animation: pulse 1s infinite;
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .gradient-header h1 {
+                font-size: 1.75rem !important;
+            }
+            
+            .gradient-header p {
+                font-size: 1rem !important;
+            }
+            
+            .timer-fixed {
+                bottom: 12px;
+                right: 12px;
+                padding: 12px 16px;
+                border-radius: 12px;
+            }
+            
+            .timer-fixed .text-3xl {
+                font-size: 1.5rem;
+            }
+            
+            .timer-fixed .text-2xl {
+                font-size: 1.25rem;
+            }
+            
+            body {
+                font-size: 14px;
+            }
+            
+            .document-input {
+                font-size: 12px;
+                min-width: 100px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .gradient-header {
+                padding: 1.5rem 0 !important;
+            }
+            
+            .gradient-header h1 {
+                font-size: 1.5rem !important;
+            }
+            
+            .timer-fixed {
+                bottom: 8px;
+                right: 8px;
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div class="gradient-header text-white py-6 md:py-8 mb-6 md:mb-8">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <a href="../index.html" class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-3 md:px-4 py-2 rounded-lg transition text-sm md:text-base">
+                    <span>←</span>
+                    <span>На главную</span>
+                </a>
+                <div class="text-xs md:text-sm opacity-90">АНО ДПО «УЦИБ»</div>
+            </div>
+            <h1 class="text-2xl md:text-4xl font-bold mb-2">📄 Архивная справка</h1>
+            <p class="text-base md:text-xl opacity-90">Тренажер по архивному делу</p>
+        </div>
+    </div>
+    
+    <!-- Фиксированный таймер -->
+    <div id="timer" class="timer-fixed no-print">
+        <div class="flex items-center gap-3">
+            <span class="text-3xl">⏱️</span>
+            <div>
+                <div class="text-xs opacity-90 font-medium">Осталось времени</div>
+                <div id="timer-display" class="text-2xl font-bold">10:00</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Выбор варианта -->
+    <div id="variantSelector" class="max-w-6xl mx-auto px-4">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-4">Выберите вариант задания</h1>
+            <p class="text-gray-600 mb-6 text-center">Выберите вариант для заполнения архивной справки</p>
+            
+            <div class="space-y-3">
+                <button onclick="selectVariant(1)" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium shadow-md">
+                    Вариант 1: Майорова Алена Николаевна
+                </button>
+                <button onclick="selectVariant(2)" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium shadow-md">
+                    Вариант 2: Борков Алексей Аркадьевич
+                </button>
+                <button onclick="selectVariant(3)" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium shadow-md">
+                    Вариант 3: Вершинина Анна Семеновна
+                </button>
+                <button onclick="selectVariant(4)" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium shadow-md">
+                    Вариант 4: Семенова Юлия Вячеславовна
+                </button>
+                <button onclick="selectVariant(5)" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium shadow-md">
+                    Вариант 5: Шестакова Ольга Анатольевна
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Форма документа -->
+    <div id="documentForm" class="hidden max-w-6xl mx-auto px-4 pb-8">
+        <div class="no-print mb-6 bg-white rounded-xl shadow-lg p-4 flex justify-between items-center">
+            <a href="../index.html" class="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition">
+                <span>←</span>
+                <span>На главную</span>
+            </a>
+            <button onclick="goBack()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+                ← Сменить вариант
+            </button>
+            <span id="variantTitle" class="text-lg font-semibold text-gray-700"></span>
+        </div>
+        
+        <!-- Бланк документа -->
+        <div class="bg-white rounded-xl shadow-lg p-8 document-font" style="font-size: 14px; line-height: 1.6;">
+            <!-- Шапка -->
+            <div class="flex justify-between mb-4">
+                <div class="w-1/2 pr-4">
+                    <p class="font-bold text-center">Автономная некоммерческая организация дополнительного профессионального образования «Учебный центр информационной безопасности»</p>
+                    <p class="text-center">(АНО ДПО «УЦИБ»)</p>
+                </div>
+                <div class="w-1/2 pl-4 text-right">
+                    <p>ООППЗЛиЗР № 3 ОСФР по Пермскому краю</p>
+                    <p>Специалисту</p>
+                    <p>Наймушиной М.Н.</p>
+                    <p class="mt-2">Шоссе Космонавтов, 177, г. Пермь,</p>
+                    <p>Пермский край, 614036</p>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <p>Улица Алексея Беленца, д. 11, город Томск, Томская область, 634050</p>
+                <p>Телефон +7 (3822) 51-80-62</p>
+                <p>ОГРН 1027000860006 ОКПО 02523728</p>
+                <p>ИНН/КПП 7021020265/ 701701001</p>
+            </div>
+            
+            <h2 class="text-left font-bold text-lg my-6">АРХИВНАЯ СПРАВКА</h2>
+            
+            <div class="mb-4">
+                <p>_____________ № __________________</p>
+                <p>На № 1659/ПСХ от 14.12.2025</p>
+            </div>
+            
+            <!-- Основной текст с полями ввода -->
+            <div class="text-justify" style="text-indent: 1.25cm;">
+                <p class="mb-4">
+                    В документах архивного фонда Автономная некоммерческая организация дополнительного профессионального образования «Учебный центр информационной безопасности», в личной карточке работника содержатся следующие сведения о 
+                    <span class="inline-block">
+                        <input type="text" id="fio" class="document-input w-64" placeholder="ФИО в предложном падеже" oninput="validateField('fio')">
+                    </span>, 
+                    <span class="inline-block">
+                        <input type="text" id="birthDate" class="document-input w-28" placeholder="ДД.ММ.ГГГГ" oninput="validateField('birthDate')">
+                    </span> года рождения:
+                </p>
+                <div id="hint-fio" class="hint-box">Проверьте правильность написания ФИО в предложном падеже</div>
+                <div id="hint-birthDate" class="hint-box">Неверная дата рождения. Укажите в формате ДД.ММ.ГГГГ. Дата рождения указана на первой странице личной карточки</div>
+            </div>
+            
+            <div class="text-justify" style="text-indent: 1.25cm;">
+                <p class="mb-4">
+                    <span class="inline-block">
+                        <input type="text" id="hireDate" class="document-input w-40" placeholder="дата приема" oninput="validateField('hireDate')">
+                    </span> – <span id="genderHire">принят(а)</span> на работу на должность 
+                    <span class="inline-block">
+                        <input type="text" id="position" class="document-input w-52" placeholder="должность в род. падеже" oninput="validateField('position')">
+                    </span> 
+                    (приказ о приёме на работу от 
+                    <span class="inline-block">
+                        <input type="text" id="hireOrderDate" class="document-input w-28" placeholder="ДД.ММ.ГГГГ" oninput="validateField('hireOrderDate')">
+                    </span> № 
+                    <span class="inline-block">
+                        <input type="text" id="hireOrderNum" class="document-input w-20" placeholder="№" oninput="validateField('hireOrderNum')">
+                    </span>) с окладом в размере 
+                    <span class="inline-block">
+                        <input type="text" id="salary" class="document-input w-20" placeholder="сумма" oninput="validateField('salary')">
+                    </span> рублей.
+                </p>
+                <div id="hint-hireDate" class="hint-box">Проверьте дату приема на работу. Формат: ДД месяц ГГГГ г. (например: 03 июля 2017 г.)</div>
+                <div id="hint-position" class="hint-box">Проверьте правильность написания должности в родительном падеже</div>
+                <div id="hint-hireOrderDate" class="hint-box">Проверьте дату приказа о приеме на работу. Эти сведения указаны в личной карточке в разделе III. ПРИЕМ НА РАБОТУ И ПЕРЕВОДЫ НА ДРУГУЮ РАБОТУ. Формат: ДД.ММ.ГГГГ</div>
+                <div id="hint-hireOrderNum" class="hint-box">Проверьте номер приказа о приеме на работу. Эти сведения указаны в личной карточке в разделе III. ПРИЕМ НА РАБОТУ И ПЕРЕВОДЫ НА ДРУГУЮ РАБОТУ</div>
+                <div id="hint-salary" class="hint-box">Проверьте правильность написания оклада. Укажите без копеек</div>
+            </div>
+            
+            <div class="text-justify" style="text-indent: 1.25cm;">
+                <p class="mb-4">
+                    <span class="inline-block">
+                        <input type="text" id="fireDate" class="document-input w-40" placeholder="дата увольнения" oninput="validateField('fireDate')">
+                    </span> – <span id="genderFire">уволен(а)</span> с занимаемой должности (приказ об увольнении от 
+                    <span class="inline-block">
+                        <input type="text" id="fireOrderDate" class="document-input w-28" placeholder="ДД.ММ.ГГГГ" oninput="validateField('fireOrderDate')">
+                    </span> № 
+                    <span class="inline-block">
+                        <input type="text" id="fireOrderNum" class="document-input w-20" placeholder="№" oninput="validateField('fireOrderNum')">
+                    </span>).
+                </p>
+                <div id="hint-fireDate" class="hint-box">Проверьте дату увольнения. Формат: ДД месяц ГГГГ г. (например: 25 мая 2023 г.)</div>
+                <div id="hint-fireOrderDate" class="hint-box">Проверьте дату приказа об увольнении. Эти сведения указаны в личной карточке на последней странице в разделе XI. Основание прекращения трудового договора (увольнения). Формат: ДД.ММ.ГГГГ</div>
+                <div id="hint-fireOrderNum" class="hint-box">Проверьте номер приказа об увольнении. Эти сведения указаны в личной карточке на последней странице в разделе XI. Основание прекращения трудового договора (увольнения)</div>
+            </div>
+            
+            <div class="my-6">
+                <p>
+                    Основание: Ф. 
+                    <span class="inline-block">
+                        <input type="text" id="fond" class="document-input w-10 text-center" placeholder="_" oninput="validateField('fond')">
+                    </span>, Оп. 
+                    <span class="inline-block">
+                        <input type="text" id="opis" class="document-input w-10 text-center" placeholder="_" oninput="validateField('opis')">
+                    </span>, Д. 
+                    <span class="inline-block">
+                        <input type="text" id="delo" class="document-input w-12 text-center" placeholder="__" oninput="validateField('delo')">
+                    </span>, Л. 
+                    <span class="inline-block">
+                        <input type="text" id="list" class="document-input w-14 text-center" placeholder="__-__" oninput="validateField('list')">
+                    </span>.
+                </p>
+                <div id="hint-fond" class="hint-box">Проверьте номер фонда. Он указан на обложке дела в Архивном шифре</div>
+                <div id="hint-opis" class="hint-box">Проверьте номер описи. Он указан на обложке дела в Архивном шифре</div>
+                <div id="hint-delo" class="hint-box">Проверьте номер дела. Он указан на обложке дела в Архивном шифре</div>
+                <div id="hint-list" class="hint-box">Проверьте номера листов. Укажите именно те листы, которые вы использовали для составления архивной справки. Формат: Л. X-Y</div>
+            </div>
+            
+            <div class="flex justify-between items-end mt-12 mb-8">
+                <p>Директор</p>
+                <div class="text-right">
+                    <input type="text" id="director" class="document-input w-40 text-center" placeholder="И.О. Фамилия" oninput="validateField('director')">
+                </div>
+            </div>
+            <div id="hint-director" class="hint-box">Проверьте правильность написания ФИО директора. Оно указано в карточке организации. Формат: И.О. Фамилия</div>
+            
+            <div class="mt-16">
+                <p>
+                    <span class="inline-block">
+                        <input type="text" id="archivist" class="document-input w-64" placeholder="ФИО архивиста полностью" oninput="validateField('archivist')">
+                    </span>, архивист
+                </p>
+                <p class="mt-1">8 (3145) 145-22-85</p>
+                <div id="hint-archivist" class="hint-box">Проверьте правильность написания ФИО архивиста. Оно указано в карточке организации. Формат: Фамилия Имя Отчество</div>
+            </div>
+        </div>
+        
+        <!-- Кнопка проверки -->
+        <div class="no-print mt-6 flex justify-center gap-4">
+            <button onclick="checkAll()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition shadow-lg">
+                ✓ Проверить всё
+            </button>
+            <button onclick="resetForm()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg">
+                🔄 Сбросить
+            </button>
+        </div>
+        
+        <!-- Статистика -->
+        <div id="statistics" class="hidden no-print mt-6 bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Результаты проверки</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-green-100 p-4 rounded-lg">
+                    <p class="text-green-800 font-semibold">Правильно заполнено:</p>
+                    <p class="text-3xl font-bold text-green-600" id="correctCount">0</p>
+                </div>
+                <div class="bg-red-100 p-4 rounded-lg">
+                    <p class="text-red-800 font-semibold">Ошибок:</p>
+                    <p class="text-3xl font-bold text-red-600" id="errorCount">0</p>
+                </div>
+            </div>
+            <div id="errorList" class="mt-4"></div>
+        </div>
+    </div>
+
+    <!-- Успешное завершение -->
+    <div id="successOverlay" class="success-overlay">
+        <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full my-8">
+            <div class="bg-green-500 text-white p-6 rounded-t-lg text-center">
+                <h2 class="text-2xl font-bold">🎉 Поздравляем!</h2>
+                <p class="text-lg mt-2">Архивная справка оформлена верно!</p>
+            </div>
+            
+            <div id="finalDocument" class="p-8 document-font" style="font-size: 14px; line-height: 1.6;">
+                <!-- Здесь будет готовый документ -->
+            </div>
+            
+            <div class="p-6 bg-gray-100 rounded-b-lg flex justify-center gap-4">
+                <button onclick="closeSuccess()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+                    Закрыть
+                </button>
+                <button onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+                    Распечатать
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Определение режима
+        const urlParams = new URLSearchParams(window.location.search);
+        const isExamMode = urlParams.get('mode') === 'exam';
+        
+        // Настройки режима
+        const MODE_CONFIG = {
+            training: {
+                time: 600, // 10 минут
+                showHints: true,
+                allowMultipleAttempts: true,
+                title: '📄 Архивная справка'
+            },
+            exam: {
+                time: 420, // 7 минут
+                showHints: false,
+                allowMultipleAttempts: false,
+                title: '🎓 Экзамен: Архивная справка'
+            }
+        };
+        
+        const currentMode = isExamMode ? MODE_CONFIG.exam : MODE_CONFIG.training;
+        
+        // Обновляем заголовок
+        document.querySelector('.gradient-header h1').textContent = currentMode.title;
+        
+        // Добавляем индикатор режима
+        if (isExamMode) {
+            const header = document.querySelector('.gradient-header .max-w-6xl');
+            const examBadge = document.createElement('div');
+            examBadge.className = 'mt-4 inline-block bg-red-500 text-white px-6 py-2 rounded-full font-semibold';
+            examBadge.innerHTML = '⚠️ РЕЖИМ ЭКЗАМЕНА: Одна попытка, без подсказок';
+            header.appendChild(examBadge);
+        }
+        
+        let attemptsMade = 0;
+        
+        // Эталонные данные для всех вариантов
+        const variants = {
+            1: {
+                name: "Вариант 1: Майорова Алена Николаевна",
+                gender: "female",
+                fio: "Майоровой Алене Николаевне",
+                birthDate: "19.08.1984",
+                hireDate: "03 июля 2017 г.",
+                position: "главного бухгалтера",
+                hireOrderDate: "03.07.2017",
+                hireOrderNum: "2-ОК",
+                salary: "30000",
+                fireDate: "25 мая 2023 г.",
+                fireOrderDate: "25.05.2023",
+                fireOrderNum: "16/ОК",
+                fond: "1",
+                opis: "2",
+                delo: "56",
+                list: "5-6",
+                director: "В.А. Елисеев",
+                archivist: "Скопа Надежда Михайловна"
+            },
+            2: {
+                name: "Вариант 2: Борков Алексей Аркадьевич",
+                gender: "male",
+                fio: "Боркове Алексее Аркадьевиче",
+                birthDate: "12.04.1990",
+                hireDate: "02 сентября 2017 г.",
+                position: "менеджера по работе с клиентами",
+                hireOrderDate: "02.09.2017",
+                hireOrderNum: "6-ОК",
+                salary: "23000",
+                fireDate: "27 октября 2023 г.",
+                fireOrderDate: "27.10.2023",
+                fireOrderNum: "20/ОК",
+                fond: "1",
+                opis: "2",
+                delo: "56",
+                list: "1-2",
+                director: "В.А. Елисеев",
+                archivist: "Скопа Надежда Михайловна"
+            },
+            3: {
+                name: "Вариант 3: Вершинина Анна Семеновна",
+                gender: "female",
+                fio: "Вершининой Анне Семеновне",
+                birthDate: "21.11.1979",
+                hireDate: "16 февраля 2019 г.",
+                position: "преподавателя",
+                hireOrderDate: "16.02.2019",
+                hireOrderNum: "2-ОК",
+                salary: "18000",
+                fireDate: "03 сентября 2023 г.",
+                fireOrderDate: "03.09.2023",
+                fireOrderNum: "20/ОК",
+                fond: "1",
+                opis: "2",
+                delo: "56",
+                list: "3-4",
+                director: "В.А. Елисеев",
+                archivist: "Скопа Надежда Михайловна"
+            },
+            4: {
+                name: "Вариант 4: Семенова Юлия Вячеславовна",
+                gender: "female",
+                fio: "Семеновой Юлии Вячеславовне",
+                birthDate: "25.03.1992",
+                hireDate: "12 апреля 2019 г.",
+                position: "менеджера по работе с клиентами",
+                hireOrderDate: "12.04.2019",
+                hireOrderNum: "6-ОК",
+                salary: "28000",
+                fireDate: "15 апреля 2023 г.",
+                fireOrderDate: "15.04.2023",
+                fireOrderNum: "14/ОК",
+                fond: "1",
+                opis: "2",
+                delo: "56",
+                list: "7-8",
+                director: "В.А. Елисеев",
+                archivist: "Скопа Надежда Михайловна"
+            },
+            5: {
+                name: "Вариант 5: Шестакова Ольга Анатольевна",
+                gender: "female",
+                fio: "Шестаковой Ольге Анатольевне",
+                birthDate: "10.06.1973",
+                hireDate: "07 сентября 2017 г.",
+                position: "преподавателя",
+                hireOrderDate: "07.09.2017",
+                hireOrderNum: "7-ОК",
+                salary: "18000",
+                fireDate: "20 февраля 2023 г.",
+                fireOrderDate: "20.02.2023",
+                fireOrderNum: "10/ОК",
+                fond: "1",
+                opis: "2",
+                delo: "56",
+                list: "9-10",
+                director: "В.А. Елисеев",
+                archivist: "Скопа Надежда Михайловна"
+            }
+        };
+        
+        let currentVariant = null;
+        
+        const fieldNames = {
+            fio: "ФИО",
+            birthDate: "Дата рождения",
+            hireDate: "Дата приема на работу",
+            position: "Должность",
+            hireOrderDate: "Дата приказа о приеме",
+            hireOrderNum: "Номер приказа о приеме",
+            salary: "Оклад",
+            fireDate: "Дата увольнения",
+            fireOrderDate: "Дата приказа об увольнении",
+            fireOrderNum: "Номер приказа об увольнении",
+            fond: "Номер фонда",
+            opis: "Номер описи",
+            delo: "Номер дела",
+            list: "Номера листов",
+            director: "ФИО директора",
+            archivist: "ФИО архивиста"
+        };
+        
+        // Система сохранения прогресса
+        const STORAGE_KEY = 'archiveTraining_progress';
+        
+        function getProgress() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : {};
+        }
+        
+        function saveProgress(trainerId, data) {
+            const progress = getProgress();
+            if (!progress[trainerId]) {
+                progress[trainerId] = {
+                    attempts: 0,
+                    bestScore: 0,
+                    bestTime: null,
+                    completed: false,
+                    lastAttempt: null
+                };
+            }
+            
+            progress[trainerId] = { ...progress[trainerId], ...data };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Таймер
+        let timeLeft = currentMode.time;
+        let timerInterval;
+        let timerStarted = false;
+        let startTime = currentMode.time;
+
+        function startTimer() {
+            if (timerStarted) return;
+            timerStarted = true;
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeUp();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            const timerElement = document.getElementById('timer-display');
+            timerElement.textContent = display;
+            
+            if (timeLeft <= 120 && timeLeft > 0) {
+                document.getElementById('timer').classList.add('timer-warning');
+            }
+            
+            if (timeLeft <= 0) {
+                timerElement.textContent = '0:00';
+            }
+        }
+
+        function handleTimeUp() {
+            alert('⏰ Время вышло! Проверяем ваши ответы...');
+            checkAll();
+        }
+        
+        function selectVariant(num) {
+            currentVariant = variants[num];
+            document.getElementById('variantSelector').classList.add('hidden');
+            document.getElementById('documentForm').classList.remove('hidden');
+            document.getElementById('variantTitle').textContent = currentVariant.name;
+            
+            // Установка пола для глаголов
+            if (currentVariant.gender === 'male') {
+                document.getElementById('genderHire').textContent = 'принят';
+                document.getElementById('genderFire').textContent = 'уволен';
+            } else {
+                document.getElementById('genderHire').textContent = 'принята';
+                document.getElementById('genderFire').textContent = 'уволена';
+            }
+            
+            resetForm();
+        }
+        
+        function goBack() {
+            document.getElementById('variantSelector').classList.remove('hidden');
+            document.getElementById('documentForm').classList.add('hidden');
+            document.getElementById('statistics').classList.add('hidden');
+            currentVariant = null;
+        }
+        
+        function validateField(fieldId) {
+            if (!currentVariant) return;
+            
+            // Запуск таймера при первом вводе
+            startTimer();
+            
+            const input = document.getElementById(fieldId);
+            const hint = document.getElementById('hint-' + fieldId);
+            const value = input.value.trim();
+            const correctValue = currentVariant[fieldId];
+            
+            if (value === '') {
+                input.classList.remove('field-correct', 'field-incorrect');
+                if (hint) hint.classList.remove('show');
+                return;
+            }
+            
+            // В режиме обучения показываем подсказки
+            if (currentMode.showHints) {
+                if (value === correctValue) {
+                    input.classList.remove('field-incorrect');
+                    input.classList.add('field-correct');
+                    if (hint) hint.classList.remove('show');
+                } else {
+                    input.classList.remove('field-correct');
+                    input.classList.add('field-incorrect');
+                    if (hint) hint.classList.add('show');
+                }
+            }
+        }
+        
+        function checkAll() {
+            if (!currentVariant) return;
+            
+            const fields = ['fio', 'birthDate', 'hireDate', 'position', 'hireOrderDate', 'hireOrderNum', 
+                           'salary', 'fireDate', 'fireOrderDate', 'fireOrderNum', 
+                           'fond', 'opis', 'delo', 'list', 'director', 'archivist'];
+            
+            let correct = 0;
+            let errors = [];
+            
+            fields.forEach(fieldId => {
+                const input = document.getElementById(fieldId);
+                const value = input.value.trim();
+                const correctValue = currentVariant[fieldId];
+                
+                if (value === correctValue) {
+                    correct++;
+                    input.classList.remove('field-incorrect');
+                    input.classList.add('field-correct');
+                    const hint = document.getElementById('hint-' + fieldId);
+                    if (hint) hint.classList.remove('show');
+                } else {
+                    errors.push(fieldNames[fieldId]);
+                    input.classList.remove('field-correct');
+                    input.classList.add('field-incorrect');
+                    const hint = document.getElementById('hint-' + fieldId);
+                    if (hint) hint.classList.add('show');
+                }
+            });
+            
+            // Показать статистику
+            const timeSpent = startTime - timeLeft;
+            const progress = getProgress()['arhivnaya-spravka'] || {};
+            const attempts = (progress.attempts || 0) + 1;
+            const isNewBest = correct > (progress.bestScore || 0);
+            const isFasterTime = !progress.bestTime || timeSpent < progress.bestTime;
+            
+            saveProgress('arhivnaya-spravka', {
+                attempts: attempts,
+                bestScore: isNewBest ? correct : progress.bestScore,
+                bestTime: (isNewBest || isFasterTime) ? timeSpent : progress.bestTime,
+                completed: errors.length === 0,
+                lastAttempt: new Date().toISOString(),
+                lastScore: correct
+            });
+            
+            document.getElementById('statistics').classList.remove('hidden');
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('errorCount').textContent = errors.length;
+            
+            const errorListDiv = document.getElementById('errorList');
+            if (errors.length > 0) {
+                errorListDiv.innerHTML = `
+                    <p class="text-red-700 font-semibold mt-2">Поля с ошибками:</p>
+                    <ul class="list-disc list-inside text-red-600">${errors.map(e => '<li>' + e + '</li>').join('')}</ul>
+                    <div class="text-sm text-gray-600 mt-3">Время: ${formatTime(timeSpent)} | Попытка: ${attempts}</div>
+                    ${progress.bestScore ? `<div class="text-sm text-blue-600 mt-1">Лучший результат: ${progress.bestScore}/16 за ${formatTime(progress.bestTime)}</div>` : ''}
+                `;
+            } else {
+                errorListDiv.innerHTML = `
+                    <div class="text-green-700 font-semibold mt-2">✓ Все поля заполнены верно!</div>
+                    <div class="text-sm text-gray-600 mt-2">Время: ${formatTime(timeSpent)} | Попытка: ${attempts}</div>
+                    ${isNewBest ? '<div class="text-sm text-green-600 mt-1">🏆 Новый рекорд!</div>' : ''}
+                    ${progress.bestScore ? `<div class="text-sm text-blue-600 mt-1">Лучший результат: ${progress.bestScore}/16 за ${formatTime(progress.bestTime)}</div>` : ''}
+                `;
+                showSuccess();
+            }
+        }
+        
+        function showSuccess() {
+            const v = currentVariant;
+            const genderHire = v.gender === 'male' ? 'принят' : 'принята';
+            const genderFire = v.gender === 'male' ? 'уволен' : 'уволена';
+            
+            const finalDoc = `
+                <div class="mb-4 flex justify-between">
+                    <div class="w-1/2 pr-4">
+                        <p class="font-bold text-center">Автономная некоммерческая организация дополнительного профессионального образования «Учебный центр информационной безопасности»</p>
+                        <p class="text-center">(АНО ДПО «УЦИБ»)</p>
+                    </div>
+                    <div class="w-1/2 pl-4 text-right">
+                        <p>ООППЗЛиЗР № 3 ОСФР по Пермскому краю</p>
+                        <p>Специалисту</p>
+                        <p>Наймушиной М.Н.</p>
+                        <p class="mt-2">Шоссе Космонавтов, 177, г. Пермь,</p>
+                        <p>Пермский край, 614036</p>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <p>Улица Алексея Беленца, д. 11, город Томск, Томская область, 634050</p>
+                    <p>Телефон +7 (3822) 51-80-62</p>
+                    <p>ОГРН 1027000860006 ОКПО 02523728</p>
+                    <p>ИНН/КПП 7021020265/ 701701001</p>
+                </div>
+                
+                <h2 class="text-left font-bold text-lg my-6">АРХИВНАЯ СПРАВКА</h2>
+                
+                <div class="mb-4">
+                    <p>_____________ № __________________</p>
+                    <p>На № 1659/ПСХ от 14.12.2025</p>
+                </div>
+                
+                <p class="text-justify mb-4" style="text-indent: 1.25cm;">
+                    В документах архивного фонда Автономная некоммерческая организация дополнительного профессионального образования «Учебный центр информационной безопасности», в личной карточке работника содержатся следующие сведения о <strong>${v.fio}</strong>, <strong>${v.birthDate}</strong> года рождения:
+                </p>
+                
+                <p class="text-justify mb-4" style="text-indent: 1.25cm;">
+                    <strong>${v.hireDate}</strong> – ${genderHire} на работу на должность <strong>${v.position}</strong> (приказ о приёме на работу от <strong>${v.hireOrderDate}</strong> № <strong>${v.hireOrderNum}</strong>) с окладом в размере <strong>${v.salary}</strong> рублей.
+                </p>
+                
+                <p class="text-justify mb-4" style="text-indent: 1.25cm;">
+                    <strong>${v.fireDate}</strong> – ${genderFire} с занимаемой должности (приказ об увольнении от <strong>${v.fireOrderDate}</strong> № <strong>${v.fireOrderNum}</strong>).
+                </p>
+                
+                <p class="my-6">
+                    Основание: Ф. <strong>${v.fond}</strong>, Оп. <strong>${v.opis}</strong>, Д. <strong>${v.delo}</strong>, Л. <strong>${v.list}</strong>.
+                </p>
+                
+                <div class="flex justify-between items-end mt-12 mb-8">
+                    <p>Директор</p>
+                    <p><strong>${v.director}</strong></p>
+                </div>
+                
+                <div class="mt-16">
+                    <p><strong>${v.archivist}</strong>, архивист</p>
+                    <p class="mt-1">8 (3145) 145-22-85</p>
+                </div>
+            `;
+            
+            document.getElementById('finalDocument').innerHTML = finalDoc;
+            document.getElementById('successOverlay').classList.add('show');
+        }
+        
+        function closeSuccess() {
+            document.getElementById('successOverlay').classList.remove('show');
+        }
+        
+        function resetForm() {
+            const fields = ['fio', 'birthDate', 'hireDate', 'position', 'hireOrderDate', 'hireOrderNum', 
+                           'salary', 'fireDate', 'fireOrderDate', 'fireOrderNum', 
+                           'fond', 'opis', 'delo', 'list', 'director', 'archivist'];
+            
+            fields.forEach(fieldId => {
+                const input = document.getElementById(fieldId);
+                input.value = '';
+                input.classList.remove('field-correct', 'field-incorrect');
+                const hint = document.getElementById('hint-' + fieldId);
+                if (hint) hint.classList.remove('show');
+            });
+            
+            document.getElementById('statistics').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
